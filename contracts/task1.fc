@@ -1,5 +1,10 @@
 #include "imports/stdlib.fc";
 
+;; update#9df10277 query_id:uint64 signature:bits512 ^[ locked_for:uint32 new_seqno:uint32 ] = ExtInMsgBody
+const int op::update = 0x9df10277;
+;; claim#bb4be234 query_id:uint64 = ExtInMsgBody
+const int op::claim = 0xbb4be234;
+
 ;; storage$_ public_key:uint256 execution_time:uint32 receiver:MsgAddressInt seqno:uint32 = Storage;
 (int, int, slice, int) load_data() impure {
     var ds = get_data().begin_parse();
@@ -38,94 +43,8 @@
 
     int op = in_msg~load_uint(32);
 
-    ;; update#9df10277 query_id:uint64 signature:bits512 ^[ locked_for:uint32 new_seqno:uint32 ] = ExtInMsgBody
-    ;; claim#bb4be234 query_id:uint64 = ExtInMsgBody
-
-    int query_id = in_msg~load_uint(64);
-
-    if (op == 0x9df10277) {
-    	var signature = in_msg~load_bits(512);
-        int hash = slice_hash(in_msg);
-
-        cell ref = in_msg~load_ref();
-        slice info = ref.begin_parse();
-        int locked_for = info~load_uint(32);
-        int new_seqno = info~load_uint(32);
-
-        ;; If new_seqno != seqno + 1, error 119 must be thrown.
-        ;; This is a check for the fact that this is a new transaction (and not an old one that was sent again).
-        throw_if(119, new_seqno != seqno + 1);
-
-        ;; If the signature does not match, you should throw error 120. This is a check on the admin.
-        throw_unless(120, check_signature(hash, signature, public_key));
-
-        ;; If locked_for <= 0, then error 121 must be thrown. locked_for must be strictly positive.
-        throw_if(121, locked_for <= 0);
-
-        ;; If execution_time < now(), you should throw error 122.
-        ;; Checking that execution_time has not passed yet.
-        ;; throw_if(122, execution_time < now());
-
-        ;; If now + locked_for < execution_time, throw error 123.
-        ;; Checking that the deferral of the will is strictly greater than the value by which it has already been deferred.
-        throw_if(123, now() + locked_for < execution_time);
-
-        ;; accept_message();
-
-        store_data(
-            public_key,
-            now() + locked_for,
-            receiver,
-            new_seqno
-        );
-    }
-
-    if (op == 0xbb4be234) {
-        ;; If execution_time has not occurred, error 124 should be thrown.
-        throw_if(124, execution_time < now());
-
-        ;; If execution_time has passed, the contract sends all TONs from its balance to the receiver's balance from the store.
-        ;; Mode = 128 / Ton value = 0 / No message body in transaction
-        var msg = begin_cell()
-            .store_uint(0x10, 6)
-            .store_slice(receiver)
-            .store_coins(0)
-            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-        .end_cell();
-        send_raw_message(msg, 128);
-    }
-}
-
-int get_seqno() method_id {
-    var (_, _, _, seqno) = load_data();
-    ;; Return the latest seqno from storage
-    return(seqno);
-}
-
-int get_execution_time() method_id {
-    var (_, execution_time, _, _) = load_data();
-    ;; Return the execution time
-    return(execution_time);
-}
-
-() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-    var (
-        public_key,
-        execution_time,
-        receiver,
-        seqno
-    ) = load_data();
-
-    var in_msg = in_msg_body;
-
-    int op = in_msg~load_uint(32);
-
-    ;; update#9df10277 query_id:uint64 signature:bits512 ^[ locked_for:uint32 new_seqno:uint32 ] = ExtInMsgBody
-    ;; claim#bb4be234 query_id:uint64 = ExtInMsgBody
-
-    int query_id = in_msg~load_uint(64);
-
-    if (op == 0x9df10277) {
+    if (op == op::update) {
+        int query_id = in_msg~load_uint(64);
     	var signature = in_msg~load_bits(512);
         int hash = slice_hash(in_msg);
 
@@ -161,8 +80,8 @@ int get_execution_time() method_id {
             new_seqno
         );
     }
-
-    if (op == 0xbb4be234) {
+    elseif (op == op::claim) {
+        int query_id = in_msg~load_uint(64);
         ;; If execution_time has not occurred, error 124 should be thrown.
         throw_if(124, execution_time < now());
 
@@ -176,4 +95,20 @@ int get_execution_time() method_id {
         .end_cell();
         send_raw_message(msg, 128);
     }
+}
+
+int get_seqno() method_id {
+    var (_, _, _, seqno) = load_data();
+    ;; Return the latest seqno from storage
+    return(seqno);
+}
+
+int get_execution_time() method_id {
+    var (_, execution_time, _, _) = load_data();
+    ;; Return the execution time
+    return(execution_time);
+}
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+
 }
