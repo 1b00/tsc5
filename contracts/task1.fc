@@ -84,7 +84,7 @@ int get_execution_time() method_id {
         ;; Checking that the deferral of the will is strictly greater than the value by which it has already been deferred.
         throw_if(123, now() + locked_for < execution_time);
 
-        accept_message();
+        ;; accept_message();
 
         store_data(
             public_key,
@@ -95,7 +95,7 @@ int get_execution_time() method_id {
     }
     elseif (op == op::claim) {
         ;; If execution_time has not occurred, error 124 should be thrown.
-        throw_if(124, execution_time > now());
+        throw_unless(124, execution_time < now());
 
         ;; If execution_time has passed, the contract sends all TONs from its balance to the receiver's balance from the store.
         ;; Mode = 128 / Ton value = 0 / No message body in transaction
