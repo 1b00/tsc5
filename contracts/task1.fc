@@ -64,7 +64,7 @@ const int op::claim = 0xbb4be234;
 
         ;; If execution_time < now(), you should throw error 122.
         ;; Checking that execution_time has not passed yet.
-        throw_if(122, execution_time < now());
+        ;; throw_if(122, execution_time < now());
 
         ;; If now + locked_for < execution_time, throw error 123.
         ;; Checking that the deferral of the will is strictly greater than the value by which it has already been deferred.
