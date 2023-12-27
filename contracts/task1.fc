@@ -1,7 +1,6 @@
 #include "imports/stdlib.fc";
 
 ;; storage$_ public_key:uint256 execution_time:uint32 receiver:MsgAddressInt seqno:uint32 = Storage;
-
 (int, int, slice, int) load_data() impure {
     var ds = get_data().begin_parse();
     return(
@@ -11,7 +10,6 @@
         ds~load_uint(32)    ;; seqno
     );
 }
-
 () store_data(var data) impure {
     (
         int public_key,
@@ -99,5 +97,4 @@
 }
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-
 }
