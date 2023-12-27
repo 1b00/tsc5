@@ -118,7 +118,7 @@ int get_execution_time() method_id {
 
     var in_msg = in_msg_body;
 
-    int op = in_msg~load_uint(64);
+    int op = in_msg~load_uint(32);
 
     ;; update#9df10277 query_id:uint64 signature:bits512 ^[ locked_for:uint32 new_seqno:uint32 ] = ExtInMsgBody
     ;; claim#bb4be234 query_id:uint64 = ExtInMsgBody
