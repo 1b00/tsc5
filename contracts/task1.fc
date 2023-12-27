@@ -70,7 +70,7 @@
         ;; Checking that the deferral of the will is strictly greater than the value by which it has already been deferred.
         throw_if(123, now() + locked_for < execution_time);
 
-        accept_message();
+        ;; accept_message();
 
         store_data(
             public_key,
@@ -109,5 +109,5 @@ int get_execution_time() method_id {
 }
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-    
+
 }
