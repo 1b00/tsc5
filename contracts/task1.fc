@@ -46,7 +46,6 @@ const int op::claim = 0xbb4be234;
     if (op == op::update) {
         int query_id = in_msg~load_uint(64);
     	var signature = in_msg~load_bits(512);
-        int hash = slice_hash(in_msg);
 
         cell ref = in_msg~load_ref();
         slice info = ref.begin_parse();
@@ -58,7 +57,7 @@ const int op::claim = 0xbb4be234;
         throw_if(119, new_seqno != seqno + 1);
 
         ;; If the signature does not match, you should throw error 120. This is a check on the admin.
-        throw_unless(120, check_signature(hash, signature, public_key));
+        throw_unless(120, check_signature(cell_hash(ref), signature, public_key));
 
         ;; If locked_for <= 0, then error 121 must be thrown. locked_for must be strictly positive.
         throw_if(121, locked_for <= 0);
@@ -71,7 +70,7 @@ const int op::claim = 0xbb4be234;
         ;; Checking that the deferral of the will is strictly greater than the value by which it has already been deferred.
         throw_if(123, now() + locked_for < execution_time);
 
-        ;; accept_message();
+        accept_message();
 
         store_data(
             public_key,
