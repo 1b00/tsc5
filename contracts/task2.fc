@@ -82,7 +82,7 @@ int get_user_share(slice user_address) method_id {
         ;; If the message did not come from the admin, the contract should throw error 120.
         throw_unless(120, equal_slices(sender_address, admin_address));
 
-        ;; accept_message();
+        accept_message();
 
         ;; slice address = in_msg_body~load_msg_addr();
         (slice address, slice share) = load_msg_addr(in_msg_body);
@@ -104,7 +104,7 @@ int get_user_share(slice user_address) method_id {
         ;; If the message did not come from the admin, the contract should throw error 120.
         throw_unless(120, equal_slices(sender_address, admin_address));
 
-        ;; accept_message();
+        accept_message();
 
         (_, int addr) = parse_std_addr(in_msg_body);
         (slice share, int found?) = users~udict_delete_get?(256, addr);
@@ -124,7 +124,7 @@ int get_user_share(slice user_address) method_id {
         ;; If there are no users, error 122 must be thrown
         throw_if(122, users.dict_empty?());
 
-        ;; accept_message();
+        accept_message();
 
         int amount = msg_value;
 
@@ -152,7 +152,7 @@ int get_user_share(slice user_address) method_id {
         ;; If there are no users, then error 122 must be thrown.
         throw_if(122, users.dict_empty?());
 
-        ;; accept_message();
+        accept_message();
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
