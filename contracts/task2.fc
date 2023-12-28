@@ -15,24 +15,24 @@ const int op::transfer_notification = 0x7362d09c;
 ;; users: (HashmapE 256 uint32) Note: uint256 is data bits of address. Workchain = 0.
 ;; CUSTOM FIELDS
 ;; total_share: uint32
-(slice, cell) load_data() impure inline {
+(slice, cell, int) load_data() impure inline {
     slice ds = get_data().begin_parse();
     return(
-        ds~load_msg_addr(), ;; admin_address
-        ds~load_dict()      ;; users
-        ;; ds~load_uint(32)    ;; total_share
+        ds~load_msg_addr()  ;; admin_address
+        ,ds~load_dict()     ;; users
+        ,ds~load_uint(32)   ;; total_share
     );
 }
 
 ;; get_users: returns a dictionary with 256 bits keys (user addresses' data bits) and the value is uint32, which means user share.
 cell get_users() method_id {
-    (_, cell users) = load_data();
+    (_, cell users, _) = load_data();
     return(users);
 }
 
 ;; get_user_share(slice user_address): returns the user's share. It is guaranteed that the user is in the storage.
 int get_user_share(slice user_address) method_id {
-    (_, cell users) = load_data();
+    (_, cell users, _) = load_data();
     (_, int addr) = parse_std_addr(user_address);
     (slice share, _) = users.udict_get?(256, addr);
     return(share.preload_uint(32));
@@ -40,16 +40,16 @@ int get_user_share(slice user_address) method_id {
 
 () store_data(var data) impure inline {
     (
-        slice admin_address,
-        cell users
-        ;; int total_share
+        slice admin_address
+        ,cell users
+        ,int total_share
     ) = data;
 
     set_data(
         begin_cell()
             .store_slice(admin_address)
             .store_dict(users)
-            ;; .store_uint(total_share, 32)
+            .store_uint(total_share, 32)
         .end_cell()
     );
 }
@@ -71,7 +71,7 @@ int get_user_share(slice user_address) method_id {
     slice sender_address = cs~load_msg_addr();
     int op = in_msg_body~load_uint(32);
     int query_id = in_msg_body~load_uint(64);
-    (slice admin_address, cell users) = load_data();
+    (slice admin_address, cell users, int t) = load_data();
 
     if (op == op::add_user) {
         ;; add_user#368ddef3 query_id:uint64 address:MsgAddressInt share:uint32 = InternalMsgBody;
@@ -94,7 +94,7 @@ int get_user_share(slice user_address) method_id {
         ;;     total_share = total_share - current_share.preload_uint(32);
         ;; }
         users~udict_set(256, addr, share);
-        store_data(admin_address, users); ;;, total_share + share.preload_uint(32));
+        store_data(admin_address, users, 0); ;;, total_share + share.preload_uint(32));
     }
     elseif (op == op::remove_user) {
         ;; remove_user#278205c8 query_id:uint64 address:MsgAddressInt = InternalMsgBody;
@@ -113,7 +113,7 @@ int get_user_share(slice user_address) method_id {
 
         accept_message();
 
-        store_data(admin_address, users); ;;, total_share - share.preload_uint(32));
+        store_data(admin_address, users, 0); ;;, total_share - share.preload_uint(32));
     }
     elseif (op == op::split_ton) {
         ;; split_ton#068530b3 query_id:uint64 = InternalMsgBody;
