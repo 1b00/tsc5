@@ -20,7 +20,7 @@ const int op::transfer_notification = 0x7362d09c;
     return(
         ds~load_msg_addr()  ;; admin_address
         ,ds~load_dict()     ;; users
-        ,slice_empty(ds) ? 0 : ds~load_uint(32)   ;; total_share
+        ,slice_empty?(ds) ? 0 : ds~load_uint(32)   ;; total_share
     );
 }
 
