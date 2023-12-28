@@ -124,33 +124,33 @@ int get_user_share(slice user_address) method_id {
         ;; If there are no users, error 122 must be thrown
         throw_if(122, users.dict_empty?());
 
-        accept_message();
+        ;; accept_message();
 
-        int amount = msg_value;
+        ;; int amount = msg_value;
 
-        int total_share = 0;
-        (int addr, slice share, int next) = users.udict_get_min?(256);
-        while (next) {
-            int user_share = share.preload_uint(32);
-            total_share = total_share + user_share;
-            (addr, share, next) = users.udict_get_next?(256, addr);
-        }
+        ;; int total_share = 0;
+        ;; (int addr, slice share, int next) = users.udict_get_min?(256);
+        ;; while (next) {
+        ;;     int user_share = share.preload_uint(32);
+        ;;     total_share = total_share + user_share;
+        ;;     (addr, share, next) = users.udict_get_next?(256, addr);
+        ;; }
 
 
-        (int addr, slice share, int next) = users.udict_get_min?(256);
-        while (next) {
-            slice user_address = begin_cell().store_uint(0, 8).store_uint(addr, 256).end_cell().begin_parse();
-            int user_share = share.preload_uint(32);
+        ;; (int addr, slice share, int next) = users.udict_get_min?(256);
+        ;; while (next) {
+        ;;     slice user_address = begin_cell().store_uint(0, 8).store_uint(addr, 256).end_cell().begin_parse();
+        ;;     int user_share = share.preload_uint(32);
 
-            var msg = begin_cell()
-                .store_uint(0x10, 6)
-                .store_slice(user_address)
-                .store_coins(user_share * amount / total_share)
-                .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1);
-            send_raw_message(msg.end_cell(), 1);
+        ;;     var msg = begin_cell()
+        ;;         .store_uint(0x10, 6)
+        ;;         .store_slice(user_address)
+        ;;         .store_coins(user_share * amount / total_share)
+        ;;         .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1);
+        ;;     send_raw_message(msg.end_cell(), 1);
             
-            (addr, share, next) = users.udict_get_next?(256, addr);
-        }
+        ;;     (addr, share, next) = users.udict_get_next?(256, addr);
+        ;; }
 
 
     }
