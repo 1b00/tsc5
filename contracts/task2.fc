@@ -73,14 +73,6 @@ int get_user_share(slice user_address) method_id {
     int query_id = in_msg_body~load_uint(64);
     (slice admin_address, cell users) = load_data();
 
-    int total_share = 0;
-    (int addr, slice share, int next) = users.udict_get_min?(256);
-    while (next) {
-        int user_share = share.preload_uint(32);
-        total_share = total_share + user_share;
-        (addr, share, next) = users.udict_get_next?(256, addr);
-    }
-
     if (op == op::add_user) {
         ;; add_user#368ddef3 query_id:uint64 address:MsgAddressInt share:uint32 = InternalMsgBody;
 
@@ -97,10 +89,10 @@ int get_user_share(slice user_address) method_id {
         (_, int addr) = parse_std_addr(address);
         ;; int share = in_msg_body~load_uint(32);
         ;; users~udict_set(256, addr, uint_to_slice(share, 32));
-        (slice current_share, int found?) = users.udict_get?(256, addr);
-        if (found?) {
-            total_share = total_share - current_share.preload_uint(32);
-        }
+        ;; (slice current_share, int found?) = users.udict_get?(256, addr);
+        ;; if (found?) {
+        ;;     total_share = total_share - current_share.preload_uint(32);
+        ;; }
         users~udict_set(256, addr, share);
         store_data(admin_address, users); ;;, total_share + share.preload_uint(32));
     }
@@ -112,14 +104,14 @@ int get_user_share(slice user_address) method_id {
         ;; If the message did not come from the admin, the contract should throw error 120.
         throw_unless(120, equal_slices(sender_address, admin_address));
 
-        accept_message();
+        ;; accept_message();
 
         (_, int addr) = parse_std_addr(in_msg_body);
         (slice share, int found?) = users~udict_delete_get?(256, addr);
         ;; If the user is not in the storage, it should throw error 121.
         throw_unless(121, found?);
 
-        ;; accept_message();
+        accept_message();
 
         store_data(admin_address, users); ;;, total_share - share.preload_uint(32));
     }
@@ -135,6 +127,15 @@ int get_user_share(slice user_address) method_id {
         accept_message();
 
         int amount = msg_value;
+
+        int total_share = 0;
+        (int addr, slice share, int next) = users.udict_get_min?(256);
+        while (next) {
+            int user_share = share.preload_uint(32);
+            total_share = total_share + user_share;
+            (addr, share, next) = users.udict_get_next?(256, addr);
+        }
+
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
@@ -155,12 +156,21 @@ int get_user_share(slice user_address) method_id {
     }
     elseif (op == op::transfer_notification) {
         ;; transfer_notification#7362d09c query_id:uint64 amount:Coins = InternalMsgBody;
+        
         int amount = in_msg_body~load_coins();
 
         ;; If there are no users, then error 122 must be thrown.
         throw_if(122, users.dict_empty?());
 
         accept_message();
+
+        int total_share = 0;
+        (int addr, slice share, int next) = users.udict_get_min?(256);
+        while (next) {
+            int user_share = share.preload_uint(32);
+            total_share = total_share + user_share;
+            (addr, share, next) = users.udict_get_next?(256, addr);
+        }
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
