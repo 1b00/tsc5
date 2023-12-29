@@ -75,7 +75,7 @@ int get_user_share(slice user_address) method_id {
     }
 
     accept_message();
-    
+
     slice sender_address = cs~load_msg_addr();
 
     int op = in_msg_body~load_uint(32);
@@ -134,7 +134,7 @@ int get_user_share(slice user_address) method_id {
 
         ;; accept_message();
 
-        int amount = cs~load_coins();
+        int amount = slice_empty?(cs) ? 0 : cs~load_coins();
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
