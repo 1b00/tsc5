@@ -13,7 +13,7 @@ const int op::transfer_notification = 0x7362d09c;
 
 ;; admin_address: MsgAddressInt
 ;; users: (HashmapE 256 uint32) Note: uint256 is data bits of address. Workchain = 0.
-;; CUSTOM FIELDS
+;; CUSTOM FIELDS:
 ;; total_share: uint32
 (slice, cell, int) load_data() impure inline {
     slice ds = get_data().begin_parse();
@@ -72,6 +72,8 @@ int get_user_share(slice user_address) method_id {
         return ();
     }
     slice sender_address = cs~load_msg_addr();
+    cs~load_msg_addr(); ;; skip dst
+
     int op = in_msg_body~load_uint(32);
     int query_id = in_msg_body~load_uint(64);
     (slice admin_address, cell users, int total_share) = load_data();
@@ -129,7 +131,7 @@ int get_user_share(slice user_address) method_id {
 
         ;; accept_message();
 
-        int amount = msg_value;
+        int amount = cs~load_coins();
 
         ;; int total_share = 0;
         ;; (int addr, slice share, int next) = users.udict_get_min?(256);
