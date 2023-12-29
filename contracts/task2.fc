@@ -27,7 +27,8 @@ const int op::transfer_notification = 0x7362d09c;
 ;; get_users: returns a dictionary with 256 bits keys (user addresses' data bits) and the value is uint32, which means user share.
 cell get_users() method_id {
     (_, cell users) = load_data();
-    return(users);
+    cell u = new_dict();
+    return(u);
 }
 
 ;; get_user_share(slice user_address): returns the user's share. It is guaranteed that the user is in the storage.
