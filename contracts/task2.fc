@@ -63,6 +63,9 @@ int get_user_share(slice user_address) method_id {
     if (in_msg_body.slice_empty?()) { ;; ignore empty messages
         return ();
     }
+
+    accept_message();
+
     slice cs = in_msg_full.begin_parse();
     int flags = cs~load_uint(4);
     if (flags & 1) { ;; ignore all bounced messages
@@ -82,7 +85,7 @@ int get_user_share(slice user_address) method_id {
         ;; If the message did not come from the admin, the contract should throw error 120.
         throw_unless(120, equal_slices(sender_address, admin_address));
 
-        accept_message();
+        ;; accept_message();
 
         ;; slice address = in_msg_body~load_msg_addr();
         (slice address, slice share) = load_msg_addr(in_msg_body);
@@ -111,7 +114,7 @@ int get_user_share(slice user_address) method_id {
         ;; If the user is not in the storage, it should throw error 121.
         throw_unless(121, found?);
 
-        accept_message();
+        ;; accept_message();
 
         store_data(admin_address, users, 0); ;;, total_share - share.preload_uint(32));
     }
