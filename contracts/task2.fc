@@ -74,8 +74,6 @@ int get_user_share(slice user_address) method_id {
         return ();
     }
 
-    accept_message();
-
     slice sender_address = cs~load_msg_addr();
 
     int op = in_msg_body~load_uint(32);
@@ -91,7 +89,7 @@ int get_user_share(slice user_address) method_id {
         ;; If the message did not come from the admin, the contract should throw error 120.
         throw_unless(120, equal_slices(sender_address, admin_address));
 
-        ;; accept_message();
+        accept_message();
 
         (slice address, slice share) = load_msg_addr(in_msg_body);
         (_, int addr) = parse_std_addr(address);
@@ -112,7 +110,7 @@ int get_user_share(slice user_address) method_id {
         ;; If the message did not come from the admin, the contract should throw error 120.
         throw_unless(120, equal_slices(sender_address, admin_address));
 
-        ;; accept_message();
+        accept_message();
 
         (_, int addr) = parse_std_addr(in_msg_body);
         (slice share, int found?) = users~udict_delete_get?(256, addr);
@@ -130,9 +128,11 @@ int get_user_share(slice user_address) method_id {
         ;; Transactions must be sent with mode = 1 and no body.
 
         ;; If there are no users, error 122 must be thrown
-        ;; throw_if(122, users.dict_empty?());
+        throw_if(122, users.dict_empty?());
 
-        ;; accept_message();
+        return();
+
+        accept_message();
 
         int amount = slice_empty?(cs) ? 0 : cs~load_coins();
 
@@ -151,12 +151,14 @@ int get_user_share(slice user_address) method_id {
     elseif (op == op::transfer_notification) {
         ;; transfer_notification#7362d09c query_id:uint64 amount:Coins = InternalMsgBody;
 
-        int amount = in_msg_body~load_coins();
+        int amount = slice_empty?(in_msg_body) ? 0 : in_msg_body~load_coins();
 
         ;; If there are no users, then error 122 must be thrown.
-        ;; throw_if(122, users.dict_empty?());
+        throw_if(122, users.dict_empty?());
 
-        ;; accept_message();
+        return();
+
+        accept_message();
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
