@@ -73,6 +73,9 @@ int get_user_share(slice user_address) method_id {
     if (flags & 1) { ;; ignore all bounced messages
         return ();
     }
+
+    accept_message();
+    
     slice sender_address = cs~load_msg_addr();
 
     int op = in_msg_body~load_uint(32);
@@ -88,7 +91,7 @@ int get_user_share(slice user_address) method_id {
         ;; If the message did not come from the admin, the contract should throw error 120.
         throw_unless(120, equal_slices(sender_address, admin_address));
 
-        accept_message();
+        ;; accept_message();
 
         (slice address, slice share) = load_msg_addr(in_msg_body);
         (_, int addr) = parse_std_addr(address);
@@ -116,7 +119,7 @@ int get_user_share(slice user_address) method_id {
         ;; If the user is not in the storage, it should throw error 121.
         throw_unless(121, found?);
 
-        accept_message();
+        ;; accept_message();
 
         store_data(admin_address, users, total_share - share.preload_uint(32));
     }
@@ -129,7 +132,7 @@ int get_user_share(slice user_address) method_id {
         ;; If there are no users, error 122 must be thrown
         ;; throw_if(122, users.dict_empty?());
 
-        accept_message();
+        ;; accept_message();
 
         int amount = cs~load_coins();
 
@@ -153,7 +156,7 @@ int get_user_share(slice user_address) method_id {
         ;; If there are no users, then error 122 must be thrown.
         ;; throw_if(122, users.dict_empty?());
 
-        accept_message();
+        ;; accept_message();
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
