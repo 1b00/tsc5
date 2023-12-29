@@ -68,6 +68,8 @@ int get_user_share(slice user_address) method_id {
         return ();
     }
 
+    return();
+
     accept_message();
 
     slice cs = in_msg_full.begin_parse();
