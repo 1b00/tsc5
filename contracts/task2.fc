@@ -92,12 +92,12 @@ int get_user_share(slice user_address) method_id {
         (_, int addr) = parse_std_addr(address);
         ;; int share = in_msg_body~load_uint(32);
         ;; users~udict_set(256, addr, uint_to_slice(share, 32));
-        ;; (slice current_share, int found?) = users.udict_get?(256, addr);
-        ;; if (found?) {
-        ;;     total_share = total_share - current_share.preload_uint(32);
-        ;; }
+        (slice current_share, int found?) = users.udict_get?(256, addr);
+        if (found?) {
+            total_share = total_share - current_share.preload_uint(32);
+        }
         users~udict_set(256, addr, share);
-        store_data(admin_address, users, 0); ;;, total_share + share.preload_uint(32));
+        store_data(admin_address, users, total_share + share.preload_uint(32));
     }
     elseif (op == op::remove_user) {
         ;; remove_user#278205c8 query_id:uint64 address:MsgAddressInt = InternalMsgBody;
@@ -116,7 +116,7 @@ int get_user_share(slice user_address) method_id {
 
         ;; accept_message();
 
-        store_data(admin_address, users, 0); ;;, total_share - share.preload_uint(32));
+        store_data(admin_address, users, total_share - share.preload_uint(32));
     }
     elseif (op == op::split_ton) {
         ;; split_ton#068530b3 query_id:uint64 = InternalMsgBody;
@@ -129,7 +129,7 @@ int get_user_share(slice user_address) method_id {
 
         ;; accept_message();
 
-        ;; int amount = msg_value;
+        int amount = msg_value;
 
         ;; int total_share = 0;
         ;; (int addr, slice share, int next) = users.udict_get_min?(256);
@@ -140,20 +140,20 @@ int get_user_share(slice user_address) method_id {
         ;; }
 
 
-        ;; (int addr, slice share, int next) = users.udict_get_min?(256);
-        ;; while (next) {
-        ;;     slice user_address = begin_cell().store_uint(0, 8).store_uint(addr, 256).end_cell().begin_parse();
-        ;;     int user_share = share.preload_uint(32);
+        (int addr, slice share, int next) = users.udict_get_min?(256);
+        while (next) {
+            slice user_address = begin_cell().store_uint(0, 8).store_uint(addr, 256).end_cell().begin_parse();
+            int user_share = share.preload_uint(32);
 
-        ;;     var msg = begin_cell()
-        ;;         .store_uint(0x10, 6)
-        ;;         .store_slice(user_address)
-        ;;         .store_coins(user_share * amount / total_share)
-        ;;         .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1);
-        ;;     send_raw_message(msg.end_cell(), 1);
+            var msg = begin_cell()
+                .store_uint(0x10, 6)
+                .store_slice(user_address)
+                .store_coins(user_share * amount / total_share)
+                .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1);
+            send_raw_message(msg.end_cell(), 1);
             
-        ;;     (addr, share, next) = users.udict_get_next?(256, addr);
-        ;; }
+            (addr, share, next) = users.udict_get_next?(256, addr);
+        }
 
 
     }
