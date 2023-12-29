@@ -74,7 +74,7 @@ int get_user_share(slice user_address) method_id {
     slice sender_address = cs~load_msg_addr();
     int op = in_msg_body~load_uint(32);
     int query_id = in_msg_body~load_uint(64);
-    (slice admin_address, cell users, int t) = load_data();
+    (slice admin_address, cell users, int total_share) = load_data();
 
     if (op == op::add_user) {
         ;; add_user#368ddef3 query_id:uint64 address:MsgAddressInt share:uint32 = InternalMsgBody;
