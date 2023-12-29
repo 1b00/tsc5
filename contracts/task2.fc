@@ -31,11 +31,11 @@ cell get_users() method_id {
 }
 
 ;; get_user_share(slice user_address): returns the user's share. It is guaranteed that the user is in the storage.
-int get_user_share(slice user_address) method_id {
+slice get_user_share(slice user_address) method_id {
     (_, cell users) = load_data();
     (_, int addr) = parse_std_addr(user_address);
     (slice share, _) = users.udict_get?(256, addr);
-    return(share.preload_uint(32));
+    return(share); ;;.preload_uint(32));
 }
 
 () store_data(var data) impure inline {
