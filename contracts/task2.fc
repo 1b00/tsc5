@@ -58,6 +58,10 @@ int get_user_share(slice user_address) method_id {
 ;;     return begin_cell().store_uint(number, bit_depth).end_cell().begin_parse();
 ;; }
 
+(slice) gen_address(int addr) inline {
+    return begin_cell().store_uint(0, 8).store_uint(addr, 256).end_cell().begin_parse();
+}
+
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
     if (in_msg_body.slice_empty?()) { ;; ignore empty messages
@@ -131,26 +135,15 @@ int get_user_share(slice user_address) method_id {
 
         ;; accept_message();
 
-        int amount = cs~load_coins();
-
-        ;; int total_share = 0;
-        ;; (int addr, slice share, int next) = users.udict_get_min?(256);
-        ;; while (next) {
-        ;;     int user_share = share.preload_uint(32);
-        ;;     total_share = total_share + user_share;
-        ;;     (addr, share, next) = users.udict_get_next?(256, addr);
-        ;; }
-
+        ;; int amount = cs~load_coins();
+        int amount = msg_value;
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
-            slice user_address = begin_cell().store_uint(0, 8).store_uint(addr, 256).end_cell().begin_parse();
-            int user_share = share.preload_uint(32);
-
             var msg = begin_cell()
                 .store_uint(0x10, 6)
-                .store_slice(user_address)
-                .store_coins(user_share * amount / total_share)
+                .store_slice(gen_address(addr))
+                .store_coins(share.preload_uint(32) * amount / total_share)
                 .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1);
             send_raw_message(msg.end_cell(), 1);
             
@@ -169,23 +162,12 @@ int get_user_share(slice user_address) method_id {
 
         ;; accept_message();
 
-        ;; int total_share = 0;
         ;; (int addr, slice share, int next) = users.udict_get_min?(256);
         ;; while (next) {
-        ;;     int user_share = share.preload_uint(32);
-        ;;     total_share = total_share + user_share;
-        ;;     (addr, share, next) = users.udict_get_next?(256, addr);
-        ;; }
-
-        ;; (int addr, slice share, int next) = users.udict_get_min?(256);
-        ;; while (next) {
-        ;;     slice user_address = begin_cell().store_uint(0, 8).store_uint(addr, 256).end_cell().begin_parse();
-        ;;     int user_share = share.preload_uint(32);
-
         ;;     var msg = begin_cell()
         ;;         .store_uint(0x10, 6)
-        ;;         .store_slice(user_address)
-        ;;         .store_coins(user_share * amount / total_share)
+        ;;         .store_slice(gen_address(addr))
+        ;;         .store_coins(share.preload_uint(32) * amount / total_share)
         ;;         .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1);
         ;;     send_raw_message(msg.end_cell(), 1);
             
