@@ -133,6 +133,7 @@ int get_user_share(slice user_address) method_id {
     elseif (op == op::split_ton) {
         ;; split_ton#068530b3 query_id:uint64 = InternalMsgBody;
 
+        throw_unless(120, equal_slices(sender_address, admin_address));
         ;; The contract accepts the message, distributes the TON to users according to their shares.
         ;; Transactions must be sent with mode = 1 and no body.
 
@@ -166,13 +167,14 @@ int get_user_share(slice user_address) method_id {
     elseif (op == op::transfer_notification) {
         ;; transfer_notification#7362d09c query_id:uint64 amount:Coins = InternalMsgBody;
 
+        throw_unless(120, equal_slices(sender_address, admin_address));
         ;; If there are no users, then error 122 must be thrown.
         throw_if(122, users.dict_empty?());
 
         accept_message();
 
         int amount = in_msg_body~load_coins();
-        slice sender_address = in_msg_body~load_msg_addr();
+        slice to_address = in_msg_body~load_msg_addr();
 
         int total_share = 0;
 
@@ -201,7 +203,7 @@ int get_user_share(slice user_address) method_id {
                 .end_cell().begin_parse();
             cell msg_full = begin_cell()
                     .store_uint(0x18, 6)
-                    .store_slice(sender_address)
+                    .store_slice(to_address)
                     .store_coins(20000000)
                     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                     .store_slice(msg_body)
