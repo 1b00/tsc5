@@ -79,6 +79,10 @@ int get_user_share(slice user_address) method_id {
     if (in_msg_body.slice_empty?()) { ;; ignore empty messages
         return ();
     }
+    
+    if (in_msg_body.slice_bits() < 32) {
+        return ();
+    }
 
     slice cs = in_msg_full.begin_parse();
     int flags = cs~load_uint(4);
@@ -141,17 +145,16 @@ int get_user_share(slice user_address) method_id {
 
         accept_message();
 
-        cs~load_msg_addr(); ;; destination?
         int amount = cs~load_coins();
         int total_share = 0;
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
             total_share = total_share + share.preload_uint(32);
-            (int addr, slice share, next) = users.udict_get_next?(256, addr);
+            (addr, share, next) = users.udict_get_next?(256, addr);
         }
 
-        (int addr, slice share, int next) = users.udict_get_min?(256);
+        (addr, share, next) = users.udict_get_min?(256);
         while (next) {
             cell msg_full = begin_cell()
                     .store_uint(0x18, 6)
@@ -161,7 +164,7 @@ int get_user_share(slice user_address) method_id {
                 .end_cell();
             send_raw_message(msg_full, 1);
             
-            (int addr, slice share, next) = users.udict_get_next?(256, addr);
+            (addr, share, next) = users.udict_get_next?(256, addr);
         }
     }
     elseif (op == op::transfer_notification) {
@@ -179,10 +182,10 @@ int get_user_share(slice user_address) method_id {
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
             total_share = total_share + share.preload_uint(32);
-            (int addr, slice share, next) = users.udict_get_next?(256, addr);
+            (addr, share, next) = users.udict_get_next?(256, addr);
         }
 
-        (int addr, slice share, int next) = users.udict_get_min?(256);
+        (addr, share, next) = users.udict_get_min?(256);
         while (next) {
             ;; transfer#0f8a7ea5 query_id:uint64 amount:(VarUInteger 16) destination:MsgAddress
             ;;          response_destination:MsgAddress custom_payload:(Maybe ^Cell)
@@ -203,12 +206,12 @@ int get_user_share(slice user_address) method_id {
                     .store_uint(0x18, 6)
                     .store_slice(user_address)
                     .store_coins(20000000)
-                    .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                     .store_slice(msg_body)
                 .end_cell();
             send_raw_message(msg_full, 1);
             
-            (int addr, slice share, next) = users.udict_get_next?(256, addr);
+            (addr, share, next) = users.udict_get_next?(256, addr);
         }
 
     }
