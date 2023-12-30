@@ -137,7 +137,7 @@ int get_user_share(slice user_address) method_id {
         ;; Transactions must be sent with mode = 1 and no body.
 
         ;; If there are no users, error 122 must be thrown
-        ;; throw_if(122, users.dict_empty?());
+        throw_if(122, users.dict_empty?());
 
         accept_message();
 
@@ -167,15 +167,13 @@ int get_user_share(slice user_address) method_id {
         ;; transfer_notification#7362d09c query_id:uint64 amount:Coins = InternalMsgBody;
 
         ;; If there are no users, then error 122 must be thrown.
-        ;; throw_if(122, users.dict_empty?());
+        throw_if(122, users.dict_empty?());
 
         accept_message();
 
         int amount = in_msg_body~load_coins();
-        slice to_address = in_msg_body~load_msg_addr();
 
         int total_share = 0;
-
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
             total_share = total_share + share.preload_uint(32);
@@ -201,26 +199,12 @@ int get_user_share(slice user_address) method_id {
                 .end_cell().begin_parse();
             cell msg_full = begin_cell()
                     .store_uint(0x18, 6)
-                    .store_slice(to_address)
-                    .store_coins(20000000)
+                    .store_slice(sender_address)
+                    .store_coins(20000000)      ;; Message Value: 0.02 TON
                     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                     .store_slice(msg_body)
                 .end_cell();
-            cell msg = begin_cell()
-                    .store_uint(0x18, 6)
-                    .store_slice(sender_address)
-                    .store_coins(20000000)
-                    .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-                    .store_uint(0x0f8a7ea5, 32)
-                    .store_uint(query_id, 64)
-                    .store_coins(share.preload_uint(32) * amount / total_share)
-                    .store_slice(user_address)
-                    .store_slice(user_address)
-                    .store_uint(0, 1)
-                    .store_coins(1)
-                    .store_uint(0, 1)
-                    .end_cell();
-            send_raw_message(msg, 1);
+            send_raw_message(msg_full, 1);
             
             (addr, share, next) = users.udict_get_next?(256, addr);
         }
