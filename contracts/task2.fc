@@ -142,15 +142,15 @@ int get_user_share(slice user_address) method_id {
         accept_message();
 
         int amount = cs~load_coins();
-        int total_share = 0;
 
+        int total_share = 0;
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
             total_share = total_share + share.preload_uint(32);
             (addr, share, next) = users.udict_get_next?(256, addr);
         }
 
-        (addr, share, next) = users.udict_get_min?(256);
+        (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
             cell msg_full = begin_cell()
                     .store_uint(0x18, 6)
@@ -180,7 +180,7 @@ int get_user_share(slice user_address) method_id {
             (addr, share, next) = users.udict_get_next?(256, addr);
         }
 
-        (addr, share, next) = users.udict_get_min?(256);
+        (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
             ;; transfer#0f8a7ea5 query_id:uint64 amount:(VarUInteger 16) destination:MsgAddress
             ;;          response_destination:MsgAddress custom_payload:(Maybe ^Cell)
