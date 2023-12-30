@@ -156,7 +156,7 @@ int get_user_share(slice user_address) method_id {
                     .store_uint(0x18, 6)
                     .store_slice(generate_internal_address(addr))
                     .store_coins(share.preload_uint(32) * amount / total_share)
-                    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                    .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                 .end_cell();
             send_raw_message(msg_full, 1);
             
@@ -202,7 +202,7 @@ int get_user_share(slice user_address) method_id {
                     .store_uint(0x18, 6)
                     .store_slice(sender_address)
                     .store_coins(20000000)
-                    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                    .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                     .store_slice(msg_body)
                 .end_cell();
             send_raw_message(msg_full, 1);
