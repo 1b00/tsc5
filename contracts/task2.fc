@@ -186,7 +186,7 @@ int get_user_share(slice user_address) method_id {
                 .end_cell().begin_parse();
             cell msg_full = begin_cell()
                     .store_uint(0x18, 6)
-                    .store_slice(generate_internal_address(addr))
+                    .store_slice(sender_address)
                     .store_coins(20000000)
                     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                     .store_slice(msg_body)
