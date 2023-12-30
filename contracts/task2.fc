@@ -139,6 +139,8 @@ int get_user_share(slice user_address) method_id {
         ;; If there are no users, error 122 must be thrown
         throw_if(122, users.dict_empty?());
 
+        return();
+
         accept_message();
 
         int amount = cs~load_coins();
@@ -161,6 +163,8 @@ int get_user_share(slice user_address) method_id {
 
         ;; If there are no users, then error 122 must be thrown.
         throw_if(122, users.dict_empty?());
+
+        return();
 
         accept_message();
 
