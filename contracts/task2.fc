@@ -147,7 +147,7 @@ int get_user_share(slice user_address) method_id {
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
             total_share = total_share + share.preload_uint(32);
-            (addr, share, next) = users.udict_get_next?(256, addr);
+            (int addr, slice share, next) = users.udict_get_next?(256, addr);
         }
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
@@ -160,7 +160,7 @@ int get_user_share(slice user_address) method_id {
                 .end_cell();
             send_raw_message(msg_full, 1);
             
-            (addr, share, next) = users.udict_get_next?(256, addr);
+            (int addr, slice share, next) = users.udict_get_next?(256, addr);
         }
     }
     elseif (op == op::transfer_notification) {
@@ -178,7 +178,7 @@ int get_user_share(slice user_address) method_id {
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
             total_share = total_share + share.preload_uint(32);
-            (addr, share, next) = users.udict_get_next?(256, addr);
+            (int addr, slice share, next) = users.udict_get_next?(256, addr);
         }
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
@@ -207,7 +207,7 @@ int get_user_share(slice user_address) method_id {
                 .end_cell();
             send_raw_message(msg_full, 1);
             
-            (addr, share, next) = users.udict_get_next?(256, addr);
+            (int addr, slice share, next) = users.udict_get_next?(256, addr);
         }
 
     }
