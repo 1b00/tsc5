@@ -139,11 +139,16 @@ int get_user_share(slice user_address) method_id {
         ;; If there are no users, error 122 must be thrown
         throw_if(122, users.dict_empty?());
 
-        return();
-
         accept_message();
 
         int amount = cs~load_coins();
+        int total_share = 0;
+
+        (int addr, slice share, int next) = users.udict_get_min?(256);
+        while (next) {
+            total_share = total_share + share.preload_uint(32);
+            (addr, share, next) = users.udict_get_next?(256, addr);
+        }
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
@@ -164,12 +169,17 @@ int get_user_share(slice user_address) method_id {
         ;; If there are no users, then error 122 must be thrown.
         throw_if(122, users.dict_empty?());
 
-        return();
-
         accept_message();
 
         int amount = in_msg_body~load_coins();
-        int total_share = 1;
+
+        int total_share = 0;
+
+        (int addr, slice share, int next) = users.udict_get_min?(256);
+        while (next) {
+            total_share = total_share + share.preload_uint(32);
+            (addr, share, next) = users.udict_get_next?(256, addr);
+        }
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
