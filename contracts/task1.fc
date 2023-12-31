@@ -48,10 +48,6 @@ int get_execution_time() method_id {
 }
 
 () recv_external(slice in_msg) impure {
-    if (in_msg.slice_empty?()) { ;; ignore empty messages
-        return ();
-    }
-
     int op = in_msg.preload_uint(32);
 
     if (op == op::update) {
