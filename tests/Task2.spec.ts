@@ -37,29 +37,9 @@ describe('Task2', () => {
         // blockchain and task2 are ready to use
     });
 
-    it('should test', async () => {
+    it('should create new address', async () => {
         const newOwner = new Address(0, pseudoRandomBytes(256 / 8));
 
-    });
-
-    it('fibonacci_sequence', async () => {
-        // the check is done inside beforeEach
-        // blockchain and task3 are ready to use
-        const tb = new TupleBuilder();
-        tb.writeNumber(201);
-        tb.writeNumber(4);
-
-        // let exp = tb.writeCell
-
-        const r = await blockchain.runGetMethod(task2.address, "test_case", tb.build())
-
-        // let rc = r.stackReader.readBigNumber()
-        console.log("gasUsed: ", r.gasUsed.toString())
-        // console.log("rc: ", rc.toString())
-        // let op = rc.beginParse().loadUint(32);
-        // console.log("loadBits: ", op.toString())
-
-        // expect(op).toBe(108)
     });
 
 });
