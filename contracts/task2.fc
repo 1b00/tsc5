@@ -97,7 +97,9 @@ int get_user_share(slice user_address) method_id {
         ;; (_, int addr) = parse_std_addr(in_msg_body~load_msg_addr());
         ;; int addr = in_msg_body.skip_bits(3 + 8).preload_uint(256);
         ;; slice share = in_msg_body;
-        users~udict_set(256, in_msg_body.skip_bits(3 + 8).preload_uint(256), in_msg_body.skip_bits(3 + 8 + 256));
+        in_msg_body~skip_bits(3 + 8);
+        int a = in_msg_body~load_uint(256);
+        users~udict_set(256, a, in_msg_body);
         store_data(admin_address, users);
     }
     elseif (op == op::remove_user) {
