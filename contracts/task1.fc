@@ -13,20 +13,20 @@ const int op::claim = 0xbb4be234;
         ds~load_uint(256),  ;; public_key
         ds~load_uint(32),   ;; execution_time
         ds~load_msg_addr(), ;; receiver
-        ds.preload_uint(32)    ;; seqno
+        ds.preload_uint(32) ;; seqno
     );
 }
 
 int get_seqno() method_id {
-    var (_, _, _, seqno) = load_data();
+    ;; var (_, _, _, seqno) = load_data();
     ;; Return the latest seqno from storage
-    return(seqno);
+    return(get_data().begin_parse().skip_bits(256 + 32 + 3 + 8 + 256).preload_uint(32));
 }
 
 int get_execution_time() method_id {
-    var (_, execution_time, _, _) = load_data();
+    ;; var (_, execution_time, _, _) = load_data();
     ;; Return the execution time
-    return(execution_time);
+    return(get_data().begin_parse().skip_bits(256).preload_uint(32));
 }
 
 () store_data(var data) impure inline {
@@ -64,7 +64,7 @@ int get_execution_time() method_id {
         cell ref = in_msg.preload_ref();
         slice info = ref.begin_parse();
         int locked_for = info~load_uint(32);
-        int new_seqno = info~load_uint(32);
+        int new_seqno = info.preload_uint(32);
 
         ;; If new_seqno != seqno + 1, error 119 must be thrown.
         ;; This is a check for the fact that this is a new transaction (and not an old one that was sent again).
