@@ -15,11 +15,6 @@ const int op::transfer_notification = 0x7362d09c;
 ;;                  = InternalMsgBody;
 const int op::transfer = 0x0f8a7ea5;
 
-;; (int) test_case(int m, int n) impure {
-;;     ~strdump("test case");
-;;     return m + n;
-;; }
-
 ;; admin_address: MsgAddressInt
 ;; users: (HashmapE 256 uint32) Note: uint256 is data bits of address. Workchain = 0.
 (slice, cell) load_data() impure inline {
@@ -170,8 +165,6 @@ int get_user_share(slice user_address) method_id {
             (addr, share, next) = users.udict_get_next?(256, addr);
         }
 
-        slice source_address = sender_address; ;;my_address();
-
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
             ;; transfer#0f8a7ea5 query_id:uint64 amount:(VarUInteger 16) destination:MsgAddress
@@ -191,10 +184,11 @@ int get_user_share(slice user_address) method_id {
                 .end_cell();
             cell msg_full = begin_cell()
                     .store_uint(0x18, 6)
-                    .store_slice(source_address)
+                    .store_slice(sender_address)
                     .store_coins(20000000)      ;; Message Value: 0.02 TON
                     .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-                    .store_ref(msg_body)
+                                                ;; inplace message body flag (Either) https://docs.ton.org/develop/smart-contracts/messages#message-size
+                    .store_ref(msg_body)        ;; total size of the cell will be more than 1023 bits, so store body in the reference cell
                 .end_cell();
             send_raw_message(msg_full, 1);
             
