@@ -143,12 +143,12 @@ int get_user_share(slice user_address) method_id {
 
         int amount = msg_value; ;; cs~load_coins();
 
-        int total_share = 0;
-        (int addr, slice share, int next) = users.udict_get_min?(256);
-        while (next) {
-            total_share = total_share + share.preload_uint(32);
-            (addr, share, next) = users.udict_get_next?(256, addr);
-        }
+        ;; int total_share = 0;
+        ;; (int addr, slice share, int next) = users.udict_get_min?(256);
+        ;; while (next) {
+        ;;     total_share = total_share + share.preload_uint(32);
+        ;;     (addr, share, next) = users.udict_get_next?(256, addr);
+        ;; }
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
