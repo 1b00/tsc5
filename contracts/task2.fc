@@ -1,5 +1,6 @@
 #include "imports/stdlib.fc";
 
+;; https://blog.ton.org/how-to-shard-your-ton-smart-contract-and-why-studying-the-anatomy-of-tons-jettons
 
 ;; add_user#368ddef3 query_id:uint64 address:MsgAddressInt share:uint32 = InternalMsgBody;
 const int op::add_user = 0x368ddef3;
@@ -108,7 +109,7 @@ int get_user_share(slice user_address) method_id {
 
         accept_message();
 
-        (_, int addr) = parse_std_addr(in_msg_body~load_msg_addr());
+        int addr = in_msg_body.skip_bits(11).preload_uint(256); ;;parse_std_addr(in_msg_body~load_msg_addr());
         (_, int found?) = users~udict_delete_get?(256, addr);
         ;; If the user is not in the storage, it should throw error 121.
         throw_unless(121, found?);
