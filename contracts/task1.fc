@@ -48,23 +48,28 @@ int get_execution_time() method_id {
 }
 
 () recv_external(slice in_msg) impure {
-    var (
-        public_key,
-        execution_time,
-        receiver,
-        seqno
-    ) = load_data();
+    if (in_msg.slice_empty?()) { ;; ignore empty messages
+        return ();
+    }
 
-    int op = in_msg~load_uint(32);
-    _ = in_msg~load_uint(64); ;; query_id
+    int op = in_msg.preload_uint(32);
 
     if (op == op::update) {
+        var (
+            public_key,
+            execution_time,
+            receiver,
+            seqno
+        ) = load_data();
+
+        in_msg~load_uint(32); ;; op
+        in_msg~load_uint(64); ;; query_id
     	var signature = in_msg~load_bits(512);
 
-        cell ref = in_msg~load_ref();
+        cell ref = in_msg.preload_ref();
         slice info = ref.begin_parse();
         int locked_for = info~load_uint(32);
-        int new_seqno = info~load_uint(32);
+        int new_seqno = info.preload_uint(32);
 
         ;; If new_seqno != seqno + 1, error 119 must be thrown.
         ;; This is a check for the fact that this is a new transaction (and not an old one that was sent again).
@@ -94,6 +99,8 @@ int get_execution_time() method_id {
         );
     }
     elseif (op == op::claim) {
+        var (_, execution_time, receiver, _) = load_data();
+
         ;; If execution_time has not occurred, error 124 should be thrown.
         throw_unless(124, execution_time < now());
 
@@ -102,7 +109,7 @@ int get_execution_time() method_id {
         ;; If execution_time has passed, the contract sends all TONs from its balance to the receiver's balance from the store.
         ;; Mode = 128 / Ton value = 0 / No message body in transaction
         send_raw_message(begin_cell()
-                            .store_uint(0x10, 6)
+                            .store_uint(0x18, 6)
                             .store_slice(receiver)
                             .store_coins(0)
                             .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
