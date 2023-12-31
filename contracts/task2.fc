@@ -77,10 +77,9 @@ int get_user_share(slice user_address) method_id {
         return ();
     }
 
-    slice sender_address = cs~load_msg_addr();
+    (slice sender_address, _) = cs.load_msg_addr();
 
-    int op = in_msg_body~load_uint(32);
-    int query_id = in_msg_body~load_uint(64);
+    int op = in_msg_body.preload_uint(32);
     (slice admin_address, cell users) = load_data();
 
     if (op == op::add_user) {
@@ -95,9 +94,9 @@ int get_user_share(slice user_address) method_id {
         accept_message();
 
         ;; (_, int addr) = parse_std_addr(in_msg_body~load_msg_addr());
-        ;; in_msg_body.skip_bits(3 + 8);
-        (slice share, int addr) = in_msg_body.skip_bits(3 + 8).load_uint(256);
         ;; slice share = in_msg_body;
+        (slice share, int addr) = in_msg_body.skip_bits(32 + 64 + 3 + 8).load_uint(256);
+
         users~udict_set(256, addr, share);
         store_data(admin_address, users);
     }
@@ -111,7 +110,8 @@ int get_user_share(slice user_address) method_id {
 
         accept_message();
 
-        int addr = in_msg_body.skip_bits(3 + 8).preload_uint(256); ;;parse_std_addr(in_msg_body~load_msg_addr());
+        ;; (_, int addr) = parse_std_addr(in_msg_body~load_msg_addr());
+        int addr = in_msg_body.skip_bits(32 + 64 + 3 + 8).preload_uint(256);
         (_, int found?) = users~udict_delete_get?(256, addr);
         ;; If the user is not in the storage, it should throw error 121.
         throw_unless(121, found?);
@@ -129,8 +129,6 @@ int get_user_share(slice user_address) method_id {
 
         accept_message();
 
-        int amount = msg_value;
-
         int total_share = 0;
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
@@ -143,7 +141,7 @@ int get_user_share(slice user_address) method_id {
             cell msg_full = begin_cell()
                     .store_uint(0x18, 6)
                     .store_slice(generate_internal_address(addr))
-                    .store_coins(share.preload_uint(32) * amount / total_share)
+                    .store_coins(share.preload_uint(32) * msg_value / total_share)
                     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                 .end_cell();
             send_raw_message(msg_full, 1);
@@ -159,7 +157,9 @@ int get_user_share(slice user_address) method_id {
 
         accept_message();
 
-        int amount = in_msg_body~load_coins();
+        in_msg_body~skip_bits(32);
+        int query_id = in_msg_body~load_uint(64);
+        (_, int amount) = in_msg_body.load_coins();
 
         int total_share = 0;
         (int addr, slice share, int next) = users.udict_get_min?(256);
