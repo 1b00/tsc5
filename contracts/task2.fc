@@ -56,12 +56,13 @@ int get_user_share(slice user_address) method_id {
 
 (slice) generate_internal_address(int addr) inline {
     ;; addr_std$10 anycast:(Maybe Anycast) workchain_id:int8 address:bits256  = MsgAddressInt;
-    int workchain_id = 0;
+    ;; int workchain_id = 0;
 
     return begin_cell()
-        .store_uint(2, 2) ;; addr_std$10
-        .store_uint(0, 1) ;; anycast nothing
-        .store_int(workchain_id, 8)
+        ;; .store_uint(2, 2) ;; addr_std$10
+        ;; .store_uint(0, 1) ;; anycast nothing
+        ;; .store_int(workchain_id, 8)
+        .store_uint(0x400, 11)
         .store_uint(addr, 256)
     .end_cell().begin_parse();
 }
@@ -77,7 +78,7 @@ int get_user_share(slice user_address) method_id {
         return ();
     }
 
-    slice sender_address = cs~load_msg_addr();
+    (_, slice sender_address) = cs.load_msg_addr();
 
     int op = in_msg_body.preload_uint(32);
     (slice admin_address, cell users) = load_data();
