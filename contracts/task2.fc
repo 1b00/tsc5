@@ -179,41 +179,24 @@ int get_user_share(slice user_address) method_id {
             ;;          forward_ton_amount:(VarUInteger 16) forward_payload:(Either Cell ^Cell)
             ;;          = InternalMsgBody;
             slice user_address = generate_internal_address(addr);
-            ;; slice msg_body = begin_cell()
-            ;;         .store_uint(op::transfer, 32)
-            ;;         .store_uint(query_id, 64)
-            ;;         .store_coins(share.preload_uint(32) * amount / total_share) ;; The contract should send out to all users according to their shares
-            ;;         .store_slice(user_address)  ;; destination
-            ;;         .store_slice(user_address)  ;; response_destination, Response address must be equal to the recipient address
-            ;;         .store_uint(0, 1)           ;; custom_payload, Without custom_payload
-            ;;         .store_coins(1)             ;; forward_ton_amount, Forward_amount = 1 nanoTON
-            ;;         .store_uint(0, 1)           ;; forward_payload, without forward_payload
-            ;;     .end_cell().begin_parse();
-            ;; cell msg_full = begin_cell()
-            ;;         .store_uint(0x18, 6)
-            ;;         .store_slice(source_address)
-            ;;         .store_coins(20000000)      ;; Message Value: 0.02 TON
-            ;;         .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-            ;;         .store_slice(msg_body)
-            ;;     .end_cell();
-
-
-            cell msg = begin_cell()
+            cell msg_body = begin_cell()
+                    .store_uint(op::transfer, 32)
+                    .store_uint(query_id, 64)
+                    .store_coins(share.preload_uint(32) * amount / total_share) ;; The contract should send out to all users according to their shares
+                    .store_slice(user_address)  ;; destination
+                    .store_slice(user_address)  ;; response_destination, Response address must be equal to the recipient address
+                    .store_uint(0, 1)           ;; custom_payload, Without custom_payload
+                    .store_coins(1)             ;; forward_ton_amount, Forward_amount = 1 nanoTON
+                    .store_uint(0, 1)           ;; forward_payload, without forward_payload
+                .end_cell();
+            cell msg_full = begin_cell()
                     .store_uint(0x18, 6)
                     .store_slice(source_address)
-                    .store_coins(20000000)
+                    .store_coins(20000000)      ;; Message Value: 0.02 TON
                     .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-                    .store_uint(0x0f8a7ea5, 32)
-                    .store_uint(query_id, 64)
-                    .store_coins(share.preload_uint(32) * amount / total_share)
-                    .store_slice(user_address)
-                    .store_slice(user_address)
-                    .store_uint(0, 1)
-                    .store_coins(1)
-                    .store_uint(0, 1)
-                    .end_cell();
-
-            send_raw_message(msg, 1);
+                    .store_ref(msg_body)
+                .end_cell();
+            send_raw_message(msg_full, 1);
             
             (addr, share, next) = users.udict_get_next?(256, addr);
         }
