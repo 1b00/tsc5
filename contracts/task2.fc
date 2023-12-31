@@ -170,6 +170,8 @@ int get_user_share(slice user_address) method_id {
             (addr, share, next) = users.udict_get_next?(256, addr);
         }
 
+        slice source_address = my_address();
+
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
             ;; transfer#0f8a7ea5 query_id:uint64 amount:(VarUInteger 16) destination:MsgAddress
@@ -189,15 +191,16 @@ int get_user_share(slice user_address) method_id {
             ;;     .end_cell().begin_parse();
             ;; cell msg_full = begin_cell()
             ;;         .store_uint(0x18, 6)
-            ;;         .store_slice(my_address())
+            ;;         .store_slice(source_address)
             ;;         .store_coins(20000000)      ;; Message Value: 0.02 TON
             ;;         .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
             ;;         .store_slice(msg_body)
             ;;     .end_cell();
 
+
             cell msg = begin_cell()
                     .store_uint(0x18, 6)
-                    .store_slice(my_address())
+                    .store_slice(source_address)
                     .store_coins(20000000)
                     .store_uint(1, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                     .store_uint(0x0f8a7ea5, 32)
