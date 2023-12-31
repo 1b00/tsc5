@@ -22,26 +22,23 @@ const int op::transfer = 0x0f8a7ea5;
 
 ;; admin_address: MsgAddressInt
 ;; users: (HashmapE 256 uint32) Note: uint256 is data bits of address. Workchain = 0.
-;; CUSTOM FIELDS:
-;; total_share: uint64
-(slice, cell, int) load_data() impure inline {
+(slice, cell) load_data() impure inline {
     slice ds = get_data().begin_parse();
     return(
         ds~load_msg_addr()  ;; admin_address
         ,ds~load_dict()     ;; users
-        ,slice_empty?(ds) ? 0 : ds.preload_uint(64)   ;; total_share
     );
 }
 
 ;; get_users: returns a dictionary with 256 bits keys (user addresses' data bits) and the value is uint32, which means user share.
 cell get_users() method_id {
-    (_, cell users, _) = load_data();
+    (_, cell users) = load_data();
     return(users);
 }
 
 ;; get_user_share(slice user_address): returns the user's share. It is guaranteed that the user is in the storage.
 int get_user_share(slice user_address) method_id {
-    (_, cell users, _) = load_data();
+    (_, cell users) = load_data();
     (_, int addr) = parse_std_addr(user_address);
     (slice share, _) = users.udict_get?(256, addr);
     return(share.preload_uint(32));
@@ -51,14 +48,12 @@ int get_user_share(slice user_address) method_id {
     (
         slice admin_address
         ,cell users
-        ,int total_share
     ) = data;
 
     set_data(
         begin_cell()
             .store_slice(admin_address)
             .store_dict(users)
-            .store_uint(total_share, 64)
         .end_cell()
     );
 }
@@ -90,7 +85,7 @@ int get_user_share(slice user_address) method_id {
 
     int op = in_msg_body~load_uint(32);
     int query_id = in_msg_body~load_uint(64);
-    (slice admin_address, cell users, int total_share) = load_data();
+    (slice admin_address, cell users) = load_data();
 
     if (op == op::add_user) {
         ;; add_user#368ddef3 query_id:uint64 address:MsgAddressInt share:uint32 = InternalMsgBody;
@@ -104,14 +99,9 @@ int get_user_share(slice user_address) method_id {
         accept_message();
 
         (_, int addr) = parse_std_addr(in_msg_body~load_msg_addr());
-        (slice current_user_share, int found?) = users.udict_get?(256, addr);
-        if (found?) {
-            total_share = total_share - current_user_share.preload_uint(32);
-        }
-
-        slice new_user_share = in_msg_body;
-        users~udict_set(256, addr, new_user_share);
-        store_data(admin_address, users, total_share + new_user_share.preload_uint(32));
+        slice share = in_msg_body;
+        users~udict_set(256, addr, share);
+        store_data(admin_address, users);
     }
     elseif (op == op::remove_user) {
         ;; remove_user#278205c8 query_id:uint64 address:MsgAddressInt = InternalMsgBody;
@@ -124,11 +114,11 @@ int get_user_share(slice user_address) method_id {
         accept_message();
 
         (_, int addr) = parse_std_addr(in_msg_body~load_msg_addr());
-        (slice current_user_share, int found?) = users~udict_delete_get?(256, addr);
+        (_, int found?) = users~udict_delete_get?(256, addr);
         ;; If the user is not in the storage, it should throw error 121.
         throw_unless(121, found?);
 
-        store_data(admin_address, users, total_share - current_user_share.preload_uint(32));
+        store_data(admin_address, users);
     }
     elseif (op == op::split_ton) {
         ;; split_ton#068530b3 query_id:uint64 = InternalMsgBody;
@@ -142,6 +132,13 @@ int get_user_share(slice user_address) method_id {
         accept_message();
 
         int amount = msg_value;
+
+        int total_share = 0;
+        (int addr, slice share, int next) = users.udict_get_min?(256);
+        while (next) {
+            total_share = total_share + share.preload_uint(32);
+            (addr, share, next) = users.udict_get_next?(256, addr);
+        }
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
