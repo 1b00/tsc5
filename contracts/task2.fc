@@ -95,11 +95,10 @@ int get_user_share(slice user_address) method_id {
         accept_message();
 
         ;; (_, int addr) = parse_std_addr(in_msg_body~load_msg_addr());
-        ;; int addr = in_msg_body.skip_bits(3 + 8).preload_uint(256);
+        ;; in_msg_body.skip_bits(3 + 8);
+        (slice share, int addr) = in_msg_body.skip_bits(3 + 8).load_uint(256);
         ;; slice share = in_msg_body;
-        in_msg_body~skip_bits(3 + 8);
-        int a = in_msg_body~load_uint(256);
-        users~udict_set(256, a, in_msg_body);
+        users~udict_set(256, addr, share);
         store_data(admin_address, users);
     }
     elseif (op == op::remove_user) {
@@ -112,8 +111,8 @@ int get_user_share(slice user_address) method_id {
 
         accept_message();
 
-        ;; int addr = in_msg_body.skip_bits(3 + 8).preload_uint(256); ;;parse_std_addr(in_msg_body~load_msg_addr());
-        (_, int found?) = users~udict_delete_get?(256, in_msg_body.skip_bits(3 + 8).preload_uint(256));
+        int addr = in_msg_body.skip_bits(3 + 8).preload_uint(256); ;;parse_std_addr(in_msg_body~load_msg_addr());
+        (_, int found?) = users~udict_delete_get?(256, addr);
         ;; If the user is not in the storage, it should throw error 121.
         throw_unless(121, found?);
 
