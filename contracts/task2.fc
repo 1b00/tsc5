@@ -170,7 +170,7 @@ int get_user_share(slice user_address) method_id {
             (addr, share, next) = users.udict_get_next?(256, addr);
         }
 
-        slice source_address = my_address();
+        slice source_address = sender_address; ;;my_address();
 
         (int addr, slice share, int next) = users.udict_get_min?(256);
         while (next) {
