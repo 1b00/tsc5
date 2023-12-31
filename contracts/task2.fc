@@ -141,7 +141,7 @@ int get_user_share(slice user_address) method_id {
 
         accept_message();
 
-        int amount = cs~load_coins();
+        int amount = msg_value; ;; cs~load_coins();
 
         int total_share = 0;
         (int addr, slice share, int next) = users.udict_get_min?(256);
@@ -199,7 +199,7 @@ int get_user_share(slice user_address) method_id {
                 .end_cell().begin_parse();
             cell msg_full = begin_cell()
                     .store_uint(0x18, 6)
-                    .store_slice(sender_address)
+                    .store_slice(my_address())
                     .store_coins(20000000)      ;; Message Value: 0.02 TON
                     .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
                     .store_slice(msg_body)
