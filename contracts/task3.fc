@@ -5,6 +5,8 @@
 ;; Did you use set_code in addition to set_c3? That got me from 3/10 to 4/10 then I did what Andy said to get to 10/10
 ;; No I used only set_c3 :( We should use set_c3 for both migration_code and new_code right?
 ;; Yes and set_code for new_code
+;; If expected_version == current_version, we do not need to set_code(new_code) right? Only have to call process_message and set_data
+;; Yes, also make sure to not migrate the storage if there are missing links in the migration chain
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 
