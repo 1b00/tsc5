@@ -9,7 +9,7 @@
 
 ;; n = rows, m = cols, max is 31x31
 ;; const int key_shift = 5;                ;;   31 takes  5 bits
-const int key_bit_size = 256; ;;key_shift * 2; ;; 3131 takes 10 bits
+;; const int key_bit_size = 256; ;;key_shift * 2; ;; 3131 takes 10 bits
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 
@@ -24,8 +24,8 @@ const int key_bit_size = 256; ;;key_shift * 2; ;; 3131 takes 10 bits
     while (i < rows) {
         j = 0;
         while (j < cols) {
-            int node = i * 100 + j;
-            maze_dict~udict_set(key_bit_size, node, maze.at(i).at(j));
+            ;; int node = i * 100 + j;
+            maze_dict~udict_set(256, i, maze.at(i).at(j));
             ;; maze.at(i).at(j) == "S"u;
             j = j + 1;
         }
