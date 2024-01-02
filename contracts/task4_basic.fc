@@ -1,9 +1,37 @@
 #include "imports/stdlib.fc";
+;; DEC 	OCT 	HEX 	BIN 	Symbol
+;; 33   041     21  00100001    !
+;; 46   056     2E	00101110    .
+;; 83   123     53  01010011    S
+;; 69   105     45  01000101    E
+;; 88   130     58  01011000    X
+;; 63   077     3F  00111111    ?
+
+;; n = rows, m = cols, max is 31x31
+const int key_shift = 5;                ;;   31 takes  5 bits
+const int key_bit_size = key_shift * 2; ;; 3131 takes 10 bits
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 
 }
 
 (int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
+    cell maze_dict = new_dict();
+    int rows = n;
+    int cols = m;
+    int i = 0;
+    int j = 0;
+    while (i < rows) {
+        j = 0;
+        while (j < cols) {
+            int node = i << key_shift + j;
+            maze_dict~udict_set(key_bit_size, node, maze.at(i).at(j));
+            ;; maze.at(i).at(j) == "S"u;
+            j = j + 1;
+        }
+
+        i = i + 1;
+    }
+
     return(-1, 0, 0, null());
 }
