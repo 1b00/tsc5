@@ -20,6 +20,8 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 }
 
 (int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
+    accept_message();
+
     cell maze_dict = new_dict();
     ;; int rows = n;
     ;; int cols = m;
