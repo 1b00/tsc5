@@ -17,8 +17,10 @@
 
 (int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
     cell maze_dict = new_dict();
-    int rows = n;
-    int cols = m;
+    ;; int rows = n;
+    ;; int cols = m;
+    int rows = maze.tlen();
+    int cols = maze.at(0).tlen();
     int i = 0;
     int j = 0;
     while (i < rows) {

@@ -1,5 +1,9 @@
 #include "imports/stdlib.fc";
 
+;; Hey, I put the recv_internal function from the bottom of the file to the top, fully replicating the template in terms of function order, and it made me pass the tests right away from 4/10. Maybe you have a similar issue?
+;; Oh and I left the msg_value and balance as they were in the task, I didn't try swapping them yet so not sure if that matters at all.
+;; Did you use set_code in addition to set_c3? That got me from 3/10 to 4/10 then I did what Andy said to get to 10/10
+
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 
 }
