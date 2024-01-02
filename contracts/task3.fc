@@ -4,6 +4,7 @@
 ;; Oh and I left the msg_value and balance as they were in the task, I didn't try swapping them yet so not sure if that matters at all.
 ;; Did you use set_code in addition to set_c3? That got me from 3/10 to 4/10 then I did what Andy said to get to 10/10
 ;; No I used only set_c3 :( We should use set_c3 for both migration_code and new_code right?
+;; Yes and set_code for new_code
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 
