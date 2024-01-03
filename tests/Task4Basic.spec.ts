@@ -69,7 +69,7 @@ describe('Task4Basic', () => {
     //     // expect(op).toBe(108)
     // });
 
-    it('solve', async () => {
+    it('solve_work', async () => {
         // the check is done inside beforeEach
         // blockchain and task3 are ready to use
         const n = 2;
@@ -85,7 +85,7 @@ describe('Task4Basic', () => {
         tb.writeNumber(n);
         tb.writeNumber(m);
         tb.writeTuple(maze.build());
-        const r = await blockchain.runGetMethod(task4Basic.address, "solve", tb.build())
+        const r = await blockchain.runGetMethod(task4Basic.address, "solve_work", tb.build())
 
         let rc = r.stackReader;
         console.log("result: ", rc)

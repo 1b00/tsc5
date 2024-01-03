@@ -15,13 +15,16 @@ const int key_bit_size = 256; ;;key_shift * 2; ;; 31 << 5 + 31 takes 10 bits
 forall X -> tuple tpush(tuple t, X value) asm "TPUSH";
 forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
-(int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
+(int, int, int, tuple, cell) solve_work(int rows, int cols, tuple maze) method_id {
     cell maze_dict = new_dict();
     int rows = 2;
     int cols = 2;
+    int x = 0;
+    int q = 0;
+    int s = 0;
     ;; int rows = maze.tlen();
     ;; int cols = maze.at(0).tlen();
-    maze_dict~udict_set(key_bit_size, 1, maze.at(0).at(0));
+    maze_dict~udict_set(key_bit_size, 1 << 5, maze.at(0).at(0));
     maze_dict~udict_set(key_bit_size, 2, maze.at(0).at(1));
     maze_dict~udict_set(key_bit_size, 3, maze.at(1).at(0));
     maze_dict~udict_set(key_bit_size, 4, maze.at(1).at(1));
@@ -39,7 +42,13 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         i += 1;
     }
 
-    return(-1, j - 2, i - 2, null());
+    return(x, q, s, maze, maze_dict);
+}
+
+(int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
+    (int x, int q, int s, tuple maze, _) = solve_work(n, m, maze);
+
+    return(-1, 0, 0, null());
 }
 
 ;; (tuple) testt (int n, int m, tuple in_maze) method_id {
