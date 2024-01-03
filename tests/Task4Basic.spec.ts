@@ -94,15 +94,17 @@ describe('Task4Basic', () => {
         const s = rc.readBigNumber();
         console.log("x: %d\tq: %d\ts: %d", x, q, s);
         console.log(rc.readTupleOpt());
-        let dict = rc.readCell().beginParse().loadDictDirect(Dictionary.Keys.Uint(256), Dictionary.Values.Uint(8));
-        var arrayOfArrays = [];
-        var bigarray = dict.values().map(element => {
+        let maze_dict_int = rc.readCell()
+            .beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(256), Dictionary.Values.Uint(8));
+        var maze_result = [];
+        var maze_dict_symbols = maze_dict_int.values().map(element => {
             return String.fromCharCode(element)
         });
-        for (var i=0; i < bigarray.length; i += n) {
-            arrayOfArrays.push(bigarray.slice(i, i + n));
+        for (var i=0; i < maze_dict_symbols.length; i += n) {
+            maze_result.push(maze_dict_symbols.slice(i, i + n));
         }
-        console.table(arrayOfArrays);
+        console.table(maze_result);
 
         console.log("gasUsed: ", r.gasUsed.toString())
         // console.log("readTuple: ", rc)

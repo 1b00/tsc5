@@ -21,17 +21,17 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     int cols = m;
     ;; int rows = maze.tlen();
     ;; int cols = maze.at(0).tlen();
-    ;; maze_dict~udict_set(key_bit_size, (0 << key_shift) + 0, maze.at(0).at(0));
-    ;; maze_dict~udict_set(key_bit_size, (0 << key_shift) + 1, maze.at(0).at(1));
-    ;; maze_dict~udict_set(key_bit_size, 1 << key_shift + 0, maze.at(1).at(0));
-    ;; maze_dict~udict_set(key_bit_size, 1 << key_shift + 1, maze.at(1).at(1));
+    maze_dict~udict_set(key_bit_size, (0 << key_shift) + 0, maze.at(0).at(0));
+    maze_dict~udict_set(key_bit_size, (0 << key_shift) + 1, maze.at(0).at(1));
+    maze_dict~udict_set(key_bit_size, 1 << key_shift + 0, maze.at(1).at(0));
+    maze_dict~udict_set(key_bit_size, 1 << key_shift + 1, maze.at(1).at(1));
     int i = 0;
     int j = 0;
     while (i < rows) {
         j = 0;
         while (j < cols) {
             int node = (i << key_shift) + j;
-            maze_dict~udict_set(key_bit_size, node, maze.at(i).at(j));
+            ;; maze_dict~udict_set(key_bit_size, node, maze.at(i).at(j));
             
             j += 1;
         }

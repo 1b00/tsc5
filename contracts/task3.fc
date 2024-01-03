@@ -7,6 +7,12 @@
 ;; Yes and set_code for new_code
 ;; If expected_version == current_version, we do not need to set_code(new_code) right? Only have to call process_message and set_data
 ;; Yes, also make sure to not migrate the storage if there are missing links in the migration chain
+;; how do we transfrom cell to cont?
+;; set_c3(code.begin_parse().bless());
+;; storage.process_message(...) will not work, but process_message(storage, ...) will.
+;; Does this mean that the migrations dictionary would be empty? Or the migration code would be empty cell?
+;; No. It'd be a normal dictionary, it'd have a key 1 and the value would be 4 and then no migration code in a reference (according to TLB)
+;; TLB can be confusing, don't hesitate to ask more if you don't understand something.
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 
