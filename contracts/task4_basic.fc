@@ -25,10 +25,10 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     int cols = 2;
     ;; int rows = maze.tlen();
     ;; int cols = maze.at(0).tlen();
-    maze_dict~udict_set(10, 0, maze.at(0).at(0));
-    maze_dict~udict_set(10, 1, maze.at(0).at(1));
-    maze_dict~udict_set(10, 1 << 5, maze.at(1).at(0));
-    maze_dict~udict_set(10, 1 << 5 + 1, maze.at(1).at(1));
+    maze_dict~udict_set(key_bit_size, 0, maze.at(0).at(0));
+    maze_dict~udict_set(key_bit_size, 1, maze.at(0).at(1));
+    maze_dict~udict_set(key_bit_size, 1 << key_shift, maze.at(1).at(0));
+    maze_dict~udict_set(key_bit_size, 1 << key_shift + 1, maze.at(1).at(1));
     int i = 0;
     while (i < rows) {
         int j = 0;
