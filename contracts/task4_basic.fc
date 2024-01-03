@@ -8,8 +8,8 @@
 ;; 63   077     3F  00111111    ?
 
 ;; n = rows, m = cols, max is 31x31
-;; const key_shift = 5;                ;; 31 takes  5 bits
-const key_bit_size = 32; ;; 31 << 5 + 31 takes 10 bits
+const int key_shift = 5;                ;; 31 takes  5 bits
+const int key_bit_size = 10; ;; 31 << 5 + 31 takes 10 bits
 
 (int) tlen (tuple t) asm "TLEN";
 forall X -> tuple tpush(tuple t, X value) asm "TPUSH";
@@ -31,7 +31,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     while (i < rows) {
         int j = 0;
         while (j < cols) {
-            int node = (i << 5) + j;
+            int node = (i << key_shift) + j;
             maze_dict~udict_set(key_bit_size, node, maze.at(i).at(j));
             
             j += 1;

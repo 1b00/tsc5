@@ -71,7 +71,7 @@ describe('Task4Basic', () => {
 
     it('solve_work', async () => {
         const key_shift = 5;                // 31 takes  5 bits
-        const key_bit_size = 32; // 31 << 5 + 31 takes 10 bits
+        const key_bit_size = 10; // 31 << 5 + 31 takes 10 bits
 
         const n = 8;
         const m = 5;
