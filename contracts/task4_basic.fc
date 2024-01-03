@@ -9,7 +9,8 @@
 
 ;; n = rows, m = cols, max is 31x31
 const int key_shift = 5;                ;; 31 takes  5 bits
-const int key_bit_size = key_shift * 2; ;; 31 << 5 + 31 takes 10 bits
+const int node_bsize = key_shift * 2;   ;; 31 << 5 + 31 takes 10 bits
+const int value_bsize = 32;             ;; to store 31x31 of Xs (weight 1M)
 
 (int) tlen (tuple t) asm "TLEN";
 forall X -> tuple tpush(tuple t, X value) asm "TPUSH";
@@ -43,22 +44,44 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     return (node_start, node_end);
 }
 
+(slice) sl(int value, int prev_node) inline {
+    return begin_cell()
+        .store_uint(value, value_bsize)
+        .store_uint(prev_node, node_bsize)
+    .end_cell().begin_parse();
+}
 
-(int, int, int, tuple, tuple, cell) solve_work(int rows, int cols, tuple maze) method_id {
+(cell, ()) store_value(cell maze_dict, int node, int new_value, int prev_node) inline {
+    (slice value, int found?) = maze_dict.udict_get?(node_bsize, node);
+    ifnot (found?) {
+        maze_dict~udict_set(node_bsize, node, sl(new_value, prev_node));
+    } else {
+        int current_value = value.preload_uint(value_bsize);
+        if (new_value < current_value) {
+            maze_dict~udict_set(node_bsize, node, sl(new_value, prev_node));
+        }
+    }
+    return (maze_dict, ());
+}
+
+(int, int, int, tuple, tuple, cell) solve_work(int rows, int cols, tuple maze_input) method_id {
     (int x, int q, int s, tuple maze_result, cell maze_dict) = (0, 0, 0, empty_tuple(), new_dict());
 
-    (int node_start, int node_end) = find_start_end_nodes(rows, cols, maze);
+    ;; find coordinates of start and end nodes
+    (int node_start, int node_end) = find_start_end_nodes(rows, cols, maze_input);
     
     ;; process input maze
-    maze_dict~udict_set(key_bit_size, node_end, "0");
+    int prev_node = node_end;
+    int value = 4200000000;
+    maze_dict~store_value(313, 13, 12);
 
-    ;; generate maze with a path
+    ;; generate output maze with a path 
     int i = 0;
     while (i < rows) {
         int j = 0;
         tuple row = empty_tuple();
         while (j < cols) {
-            int cellM = maze.at(i).at(j);
+            int cellM = maze_input.at(i).at(j);
             if(cellM == "S"u) { cellM = "E"u; }
             elseif(cellM == "E"u) { cellM = "S"u; }
             row~tpush(cellM);
@@ -70,7 +93,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         i += 1;
     }
 
-    return(node_start, node_end, s, maze, maze_result, maze_dict);
+    return(x, q, s, maze_input, maze_result, maze_dict);
 }
 
 

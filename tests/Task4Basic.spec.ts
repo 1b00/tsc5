@@ -1,5 +1,5 @@
 import { Blockchain, SandboxContract } from '@ton-community/sandbox';
-import { Cell, toNano, TupleBuilder, TupleItem } from 'ton-core';
+import { Cell, toNano, TupleBuilder, Dictionary } from 'ton-core';
 import { Task4Basic } from '../wrappers/Task4Basic';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
@@ -72,7 +72,9 @@ describe('Task4Basic', () => {
     it('solve_work', async () => {
    
         const key_shift = 5;                // 31 takes  5 bits
-        const key_bit_size = key_shift * 2; // 31 << 5 + 31 takes 10 bits
+        const node_bsize = key_shift * 2; // 31 << 5 + 31 takes 10 bits
+        const value_bsize = 32;
+        const path_dict_size = 5;
 
         const n = 8;
         const m = 5;
@@ -110,12 +112,9 @@ describe('Task4Basic', () => {
         const r = await blockchain.runGetMethod(task4Basic.address, "solve_work", tb.build())
         
         let rc = r.stackReader;
-        console.log("result: ", rc)
-
         const x = rc.readBigNumber();
         const q = rc.readBigNumber();
         const s = rc.readBigNumber();
-        console.log("x: %d\tq: %d\ts: %d", x, q, s);
 
         var maze_input_tuple = rc.readTuple();
         var maze_input = [];
@@ -133,7 +132,7 @@ describe('Task4Basic', () => {
         
         var maze_result_tuple = rc.readTuple();
         var maze_result = [];
-        var maze_dict_symbols = [];
+        const maze_dict_symbols = [];
         for (let i = 0; i < n; i++) {
             var row_result = maze_result_tuple.readTuple()
             for (let j = 0; j < m; j++) {
@@ -144,20 +143,32 @@ describe('Task4Basic', () => {
             maze_result.push(maze_dict_symbols.slice(i, i + m));
         }
         console.table(maze_result);
-        
-        // let maze_dict_int = rc.readCell()
-        //     .beginParse()
-        //     .loadDictDirect(Dictionary.Keys.Uint(key_bit_size), Dictionary.Values.Uint(8));
-        // var maze_result = [];
-        // var maze_dict_symbols = maze_dict_int.values().map(element => {
-        //     return String.fromCharCode(element)
-        // });
-        // for (var i=0; i < maze_dict_symbols.length; i += m) {
-        //     maze_result.push(maze_dict_symbols.slice(i, i + m));
-        // }
-        // console.table(maze_result);
+
+        const path_dict = rc.readCell();
+        const path_dict_values = path_dict.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(node_bsize), Dictionary.Values.Uint(value_bsize));
+        const path_dict_nodefroms = path_dict.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(node_bsize), Dictionary.Values.Uint(value_bsize + node_bsize));
+        const path_result_keys = path_dict_values.keys();
+        const path_result_values = path_dict_values.values();
+        const path_result_nodefroms = path_dict_nodefroms.values();
+        const path_result = path_result_keys.flatMap((key, i) => [
+            key >> key_shift,
+            key & 0x1f,
+            path_result_values[i],
+            (path_result_nodefroms[i] & 0x3ff) >> key_shift,
+            path_result_nodefroms[i] & 0x1f
+        ]);
+        // console.log(path_result);
+        const path_table = [];
+        for (var i = 0; i < path_result.length; i += path_dict_size) {
+            path_table.push(path_result.slice(i, i + path_dict_size));
+        }
+        console.table(path_table);
 
         console.log("gasUsed: ", r.gasUsed.toString())
+        console.log("x: %d\tq: %d\ts: %d", x, q, s);
+
         // console.log("readTuple: ", rc)
         // let op = rc.beginParse().loadUint(32);
         // console.log("loadBits: ", op.toString())
