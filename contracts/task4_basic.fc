@@ -15,13 +15,7 @@ const int key_bit_size = key_shift * 2; ;; 31 << 5 + 31 takes 10 bits
 forall X -> tuple tpush(tuple t, X value) asm "TPUSH";
 forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
-() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-
-}
-
 (int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
-    accept_message();
-
     cell maze_dict = new_dict();
     int rows = n;
     int cols = m;
@@ -37,10 +31,10 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         j = 0;
         while (j < cols) {
             int node = (i << key_shift) + j;
-            slice symbol = begin_cell().store_uint(maze.at(1).at(1), 8).end_cell().begin_parse();
+            ;; slice symbol = begin_cell().store_uint(maze.at(1).at(1), 8).end_cell().begin_parse();
 
-            maze_dict~udict_set(key_bit_size, node, symbol);
-            maze_dict.udict_get?(key_bit_size, i << key_shift + j);
+            maze_dict~udict_set(key_bit_size, node, maze.at(i).at(j));
+            ;; maze_dict.udict_get?(key_bit_size, i << key_shift + j);
             
             j += 1;
         }
@@ -49,4 +43,25 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     }
 
     return(-1, j - 2, i - 2, null());
+}
+
+(tuple) testt (int n, int m) method_id {
+    tuple maze = empty_tuple();
+    tuple maze_row = empty_tuple();
+    maze_row~tpush(".");
+    maze_row~tpush("X");
+    maze~tpush(maze_row);
+    maze_row = empty_tuple();
+    maze_row~tpush("S");
+    maze_row~tpush("?");
+    maze~tpush(maze_row);
+    (int x, int q, int s, tuple solved_maze) = solve(2, 2, maze);
+    ~dump(x);
+    ~dump(q);
+    ~dump(s);
+    return maze;
+}
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+
 }
