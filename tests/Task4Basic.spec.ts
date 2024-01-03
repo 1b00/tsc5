@@ -39,15 +39,15 @@ describe('Task4Basic', () => {
     // it('testt', async () => {
     //     // the check is done inside beforeEach
     //     // blockchain and task3 are ready to use
-    //     const row1 = new TupleBuilder();
-    //     row1.writeString("S"); 
-    //     row1.writeString("X");
-    //     const row2 = new TupleBuilder();
-    //     row2.writeString("."); 
-    //     row2.writeString("?");
+    //     const r1 = new TupleBuilder();
+    //     r1.writeString("S"); 
+    //     r1.writeString("X");
+    //     const r2 = new TupleBuilder();
+    //     r2.writeString("."); 
+    //     r2.writeString("?");
     //     const maze = new TupleBuilder();
-    //     maze.writeTuple(row1.build());
-    //     maze.writeTuple(row2.build());
+    //     maze.writeTuple(r1.build());
+    //     maze.writeTuple(r2.build());
     //     const tb = new TupleBuilder();
     //     tb.writeNumber(2);
     //     tb.writeNumber(2);
@@ -70,17 +70,37 @@ describe('Task4Basic', () => {
     // });
 
     it('solve_work', async () => {
-        // the check is done inside beforeEach
-        // blockchain and task3 are ready to use
-        const n = 2;
-        const m = 2;
-        const row1 = new TupleBuilder();
-        const row2 = new TupleBuilder();
-        row1.writeString("S"); row1.writeString("X");
-        row2.writeString("."); row2.writeString("?");
+        const key_shift = 5;                // 31 takes  5 bits
+        const key_bit_size = 32; // 31 << 5 + 31 takes 10 bits
+
+        const n = 8;
+        const m = 5;
+        const r1 = new TupleBuilder();
+        const r2 = new TupleBuilder();
+        const r3 = new TupleBuilder();
+        const r4 = new TupleBuilder();
+        const r5 = new TupleBuilder();
+        const r6 = new TupleBuilder();
+        const r7 = new TupleBuilder();
+        const r8 = new TupleBuilder();
+        // r1.writeString("."); r1.writeString("."); r1.writeString("."); r1.writeString("."); r1.writeString(".");
+        r1.writeString("S"); r1.writeString("X"); r1.writeString("."); r1.writeString("?"); r1.writeString("X");
+        r2.writeString("."); r2.writeString("X"); r2.writeString("X"); r2.writeString("."); r2.writeString("X");
+        r3.writeString("X"); r3.writeString("."); r3.writeString("?"); r3.writeString("."); r3.writeString(".");
+        r4.writeString("."); r4.writeString("?"); r4.writeString("?"); r4.writeString("."); r4.writeString(".");
+        r5.writeString("X"); r5.writeString("?"); r5.writeString("."); r5.writeString("."); r5.writeString(".");
+        r6.writeString("."); r6.writeString("."); r6.writeString("X"); r6.writeString("."); r6.writeString("X");
+        r7.writeString("."); r7.writeString("."); r7.writeString("?"); r7.writeString("."); r7.writeString(".");
+        r8.writeString("X"); r8.writeString("."); r8.writeString("."); r8.writeString("."); r8.writeString("E");
         const maze = new TupleBuilder();
-        maze.writeTuple(row1.build());
-        maze.writeTuple(row2.build());
+        maze.writeTuple(r1.build());
+        maze.writeTuple(r2.build());
+        maze.writeTuple(r3.build());
+        maze.writeTuple(r4.build());
+        maze.writeTuple(r5.build());
+        maze.writeTuple(r6.build());
+        maze.writeTuple(r7.build());
+        maze.writeTuple(r8.build());
         const tb = new TupleBuilder();
         tb.writeNumber(n);
         tb.writeNumber(m);
@@ -96,13 +116,13 @@ describe('Task4Basic', () => {
         console.log(rc.readTupleOpt());
         let maze_dict_int = rc.readCell()
             .beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(256), Dictionary.Values.Uint(8));
+            .loadDictDirect(Dictionary.Keys.Uint(key_bit_size), Dictionary.Values.Uint(8));
         var maze_result = [];
         var maze_dict_symbols = maze_dict_int.values().map(element => {
             return String.fromCharCode(element)
         });
-        for (var i=0; i < maze_dict_symbols.length; i += n) {
-            maze_result.push(maze_dict_symbols.slice(i, i + n));
+        for (var i=0; i < maze_dict_symbols.length; i += m) {
+            maze_result.push(maze_dict_symbols.slice(i, i + m));
         }
         console.table(maze_result);
 
