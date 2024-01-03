@@ -1,5 +1,5 @@
 import { Blockchain, SandboxContract } from '@ton-community/sandbox';
-import { Cell, toNano, TupleBuilder } from 'ton-core';
+import { Cell, toNano, TupleBuilder, Dictionary } from 'ton-core';
 import { Task4Basic } from '../wrappers/Task4Basic';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
@@ -36,21 +36,74 @@ describe('Task4Basic', () => {
         // blockchain and task4Basic are ready to use
     });
 
-    it('testt', async () => {
+    // it('testt', async () => {
+    //     // the check is done inside beforeEach
+    //     // blockchain and task3 are ready to use
+    //     const row1 = new TupleBuilder();
+    //     row1.writeString("S"); 
+    //     row1.writeString("X");
+    //     const row2 = new TupleBuilder();
+    //     row2.writeString("."); 
+    //     row2.writeString("?");
+    //     const maze = new TupleBuilder();
+    //     maze.writeTuple(row1.build());
+    //     maze.writeTuple(row2.build());
+    //     const tb = new TupleBuilder();
+    //     tb.writeNumber(2);
+    //     tb.writeNumber(2);
+    //     tb.writeTuple(maze.build());
+
+    //     // let exp = tb.writeCell
+
+    //     const r = await blockchain.runGetMethod(task4Basic.address, "testt", tb.build())
+
+    //     let rc = r.stackReader.readTuple()
+    //     while (rc.remaining > 0) {
+    //         console.log(rc.readTuple());
+    //     }
+    //     console.log("gasUsed: ", r.gasUsed.toString())
+    //     // console.log("readTuple: ", rc)
+    //     // let op = rc.beginParse().loadUint(32);
+    //     // console.log("loadBits: ", op.toString())
+
+    //     // expect(op).toBe(108)
+    // });
+
+    it('solve', async () => {
         // the check is done inside beforeEach
         // blockchain and task3 are ready to use
+        const n = 2;
+        const m = 2;
+        const row1 = new TupleBuilder();
+        const row2 = new TupleBuilder();
+        row1.writeString("S"); row1.writeString("X");
+        row2.writeString("."); row2.writeString("?");
+        const maze = new TupleBuilder();
+        maze.writeTuple(row1.build());
+        maze.writeTuple(row2.build());
         const tb = new TupleBuilder();
-        tb.writeNumber(201);
-        tb.writeNumber(4);
+        tb.writeNumber(n);
+        tb.writeNumber(m);
+        tb.writeTuple(maze.build());
+        const r = await blockchain.runGetMethod(task4Basic.address, "solve", tb.build())
 
-        // let exp = tb.writeCell
-
-        const r = await blockchain.runGetMethod(task4Basic.address, "testt", tb.build())
-
-        let rc = r.stackReader.readTuple()
-        while (rc.remaining > 0) {
-            console.log(rc.readTuple());
+        let rc = r.stackReader;
+        console.log("result: ", rc)
+        const x = rc.readBigNumber();
+        const q = rc.readBigNumber();
+        const s = rc.readBigNumber();
+        console.log("x: %d\tq: %d\ts: %d", x, q, s);
+        console.log(rc.readTupleOpt());
+        let dict = rc.readCell().beginParse().loadDictDirect(Dictionary.Keys.Uint(256), Dictionary.Values.Uint(8));
+        var arrayOfArrays = [];
+        var bigarray = dict.values().map(element => {
+            return String.fromCharCode(element)
+        });
+        for (var i=0; i < bigarray.length; i += n) {
+            arrayOfArrays.push(bigarray.slice(i, i + n));
         }
+        console.table(arrayOfArrays);
+
         console.log("gasUsed: ", r.gasUsed.toString())
         // console.log("readTuple: ", rc)
         // let op = rc.beginParse().loadUint(32);

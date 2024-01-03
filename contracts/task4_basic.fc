@@ -8,21 +8,21 @@
 ;; 63   077     3F  00111111    ?
 
 ;; n = rows, m = cols, max is 31x31
-const int key_shift = 5;                ;; 31 takes  5 bits
-const int key_bit_size = key_shift * 2; ;; 31 << 5 + 31 takes 10 bits
+const int key_shift = 16;                ;; 31 takes  5 bits
+const int key_bit_size = 256; ;;key_shift * 2; ;; 31 << 5 + 31 takes 10 bits
 
 (int) tlen (tuple t) asm "TLEN";
 forall X -> tuple tpush(tuple t, X value) asm "TPUSH";
 forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
-(int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
+(int, int, int, tuple, cell) solve(int n, int m, tuple maze) method_id {
     cell maze_dict = new_dict();
     int rows = n;
     int cols = m;
     ;; int rows = maze.tlen();
     ;; int cols = maze.at(0).tlen();
-    ;; maze_dict~udict_set(key_bit_size, 0 << key_shift + 0, maze.at(0).at(0));
-    ;; maze_dict~udict_set(key_bit_size, 0 << key_shift + 1, maze.at(0).at(1));
+    ;; maze_dict~udict_set(key_bit_size, (0 << key_shift) + 0, maze.at(0).at(0));
+    ;; maze_dict~udict_set(key_bit_size, (0 << key_shift) + 1, maze.at(0).at(1));
     ;; maze_dict~udict_set(key_bit_size, 1 << key_shift + 0, maze.at(1).at(0));
     ;; maze_dict~udict_set(key_bit_size, 1 << key_shift + 1, maze.at(1).at(1));
     int i = 0;
@@ -31,10 +31,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         j = 0;
         while (j < cols) {
             int node = (i << key_shift) + j;
-            ;; slice symbol = begin_cell().store_uint(maze.at(1).at(1), 8).end_cell().begin_parse();
-
             maze_dict~udict_set(key_bit_size, node, maze.at(i).at(j));
-            ;; maze_dict.udict_get?(key_bit_size, i << key_shift + j);
             
             j += 1;
         }
@@ -42,25 +39,26 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         i += 1;
     }
 
-    return(-1, j - 2, i - 2, null());
+    return(-1, j - 2, i - 2, null(), maze_dict);
 }
 
-(tuple) testt (int n, int m) method_id {
-    tuple maze = empty_tuple();
-    tuple maze_row = empty_tuple();
-    maze_row~tpush(".");
-    maze_row~tpush("X");
-    maze~tpush(maze_row);
-    maze_row = empty_tuple();
-    maze_row~tpush("S");
-    maze_row~tpush("?");
-    maze~tpush(maze_row);
-    (int x, int q, int s, tuple solved_maze) = solve(2, 2, maze);
-    ~dump(x);
-    ~dump(q);
-    ~dump(s);
-    return maze;
-}
+;; (tuple) testt (int n, int m, tuple in_maze) method_id {
+;;     tuple maze = empty_tuple();
+;;     tuple maze_row = empty_tuple();
+;;     maze_row~tpush(".");
+;;     maze_row~tpush("X");
+;;     maze~tpush(maze_row);
+;;     maze_row = empty_tuple();
+;;     maze_row~tpush("S");
+;;     maze_row~tpush("?");
+;;     maze~tpush(maze_row);
+;;     (int x, int q, int s, tuple solved_maze) = solve(2, 2, maze);
+;;     ~dump(x);
+;;     ~dump(q);
+;;     ~dump(s);
+;;     ~dump(solved_maze);
+;;     return in_maze;
+;; }
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 
