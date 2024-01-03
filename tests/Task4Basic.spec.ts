@@ -1,5 +1,5 @@
 import { Blockchain, SandboxContract } from '@ton-community/sandbox';
-import { Cell, toNano, TupleBuilder, Dictionary } from 'ton-core';
+import { Cell, toNano, TupleBuilder, TupleItem } from 'ton-core';
 import { Task4Basic } from '../wrappers/Task4Basic';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
@@ -70,8 +70,9 @@ describe('Task4Basic', () => {
     // });
 
     it('solve_work', async () => {
+   
         const key_shift = 5;                // 31 takes  5 bits
-        const key_bit_size = 10; // 31 << 5 + 31 takes 10 bits
+        const key_bit_size = key_shift * 2; // 31 << 5 + 31 takes 10 bits
 
         const n = 8;
         const m = 5;
@@ -84,14 +85,14 @@ describe('Task4Basic', () => {
         const r7 = new TupleBuilder();
         const r8 = new TupleBuilder();
         // r1.writeString("."); r1.writeString("."); r1.writeString("."); r1.writeString("."); r1.writeString(".");
-        r1.writeString("S"); r1.writeString("X"); r1.writeString("."); r1.writeString("?"); r1.writeString("X");
-        r2.writeString("."); r2.writeString("X"); r2.writeString("X"); r2.writeString("."); r2.writeString("X");
-        r3.writeString("X"); r3.writeString("."); r3.writeString("?"); r3.writeString("."); r3.writeString(".");
-        r4.writeString("."); r4.writeString("?"); r4.writeString("?"); r4.writeString("."); r4.writeString(".");
-        r5.writeString("X"); r5.writeString("?"); r5.writeString("."); r5.writeString("."); r5.writeString(".");
-        r6.writeString("."); r6.writeString("."); r6.writeString("X"); r6.writeString("."); r6.writeString("X");
-        r7.writeString("."); r7.writeString("."); r7.writeString("?"); r7.writeString("."); r7.writeString(".");
-        r8.writeString("X"); r8.writeString("."); r8.writeString("."); r8.writeString("."); r8.writeString("E");
+        r1.writeNumber("S".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); r1.writeNumber("?".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0));
+        r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0));
+        r3.writeNumber("X".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0)); r3.writeNumber("?".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0));
+        r4.writeNumber(".".charCodeAt(0)); r4.writeNumber("?".charCodeAt(0)); r4.writeNumber("?".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0));
+        r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("?".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0));
+        r6.writeNumber(".".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0));
+        r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber("?".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0));
+        r8.writeNumber("X".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber("E".charCodeAt(0));
         const maze = new TupleBuilder();
         maze.writeTuple(r1.build());
         maze.writeTuple(r2.build());
@@ -105,26 +106,56 @@ describe('Task4Basic', () => {
         tb.writeNumber(n);
         tb.writeNumber(m);
         tb.writeTuple(maze.build());
+        
         const r = await blockchain.runGetMethod(task4Basic.address, "solve_work", tb.build())
-
+        
         let rc = r.stackReader;
         console.log("result: ", rc)
+
         const x = rc.readBigNumber();
         const q = rc.readBigNumber();
         const s = rc.readBigNumber();
         console.log("x: %d\tq: %d\ts: %d", x, q, s);
-        console.log(rc.readTupleOpt());
-        let maze_dict_int = rc.readCell()
-            .beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(key_bit_size), Dictionary.Values.Uint(8));
+
+        var maze_input_tuple = rc.readTuple();
+        var maze_input = [];
+        var maze_input_dict_symbols = [];
+        for (let i = 0; i < n; i++) {
+            var row_result = maze_input_tuple.readTuple()
+            for (let j = 0; j < m; j++) {
+                maze_input_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
+            }
+        }
+        for (var i=0; i < maze_input_dict_symbols.length; i += m) {
+            maze_input.push(maze_input_dict_symbols.slice(i, i + m));
+        }
+        console.table(maze_input);
+        
+        var maze_result_tuple = rc.readTuple();
         var maze_result = [];
-        var maze_dict_symbols = maze_dict_int.values().map(element => {
-            return String.fromCharCode(element)
-        });
+        var maze_dict_symbols = [];
+        for (let i = 0; i < n; i++) {
+            var row_result = maze_result_tuple.readTuple()
+            for (let j = 0; j < m; j++) {
+                maze_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
+            }
+        }
         for (var i=0; i < maze_dict_symbols.length; i += m) {
             maze_result.push(maze_dict_symbols.slice(i, i + m));
         }
         console.table(maze_result);
+        
+        // let maze_dict_int = rc.readCell()
+        //     .beginParse()
+        //     .loadDictDirect(Dictionary.Keys.Uint(key_bit_size), Dictionary.Values.Uint(8));
+        // var maze_result = [];
+        // var maze_dict_symbols = maze_dict_int.values().map(element => {
+        //     return String.fromCharCode(element)
+        // });
+        // for (var i=0; i < maze_dict_symbols.length; i += m) {
+        //     maze_result.push(maze_dict_symbols.slice(i, i + m));
+        // }
+        // console.table(maze_result);
 
         console.log("gasUsed: ", r.gasUsed.toString())
         // console.log("readTuple: ", rc)

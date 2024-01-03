@@ -9,81 +9,77 @@
 
 ;; n = rows, m = cols, max is 31x31
 const int key_shift = 5;                ;; 31 takes  5 bits
-const int key_bit_size = 10; ;; 31 << 5 + 31 takes 10 bits
+const int key_bit_size = key_shift * 2; ;; 31 << 5 + 31 takes 10 bits
 
 (int) tlen (tuple t) asm "TLEN";
 forall X -> tuple tpush(tuple t, X value) asm "TPUSH";
 forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
-(int, int, int, tuple, cell) solve_work(int rows, int cols, tuple maze) method_id {
-    (int x, int q, int s, cell maze_dict) = (0, 0, 0, new_dict());
-    ;; int x = 0;
-    ;; int q = 0;
-    ;; int s = 0;
-    ;; cell maze_dict = new_dict();
-    ;; int rows = maze.tlen();
-    ;; int cols = maze.at(0).tlen();
-    ;; maze_dict~udict_set(key_bit_size, 1 << 5, maze.at(0).at(0));
-    ;; maze_dict~udict_set(key_bit_size, 2, maze.at(0).at(1));
-    ;; maze_dict~udict_set(key_bit_size, 3, maze.at(1).at(0));
-    ;; maze_dict~udict_set(key_bit_size, 4, maze.at(1).at(1));
+(int, int) find_start_end_nodes(int rows, int cols, tuple maze) {
+    int start_not_found? = true;
+    int end_not_found? = true;
+    int node_start = 0;
+    int node_end = 0;
+
     int i = 0;
-    while (i < rows) {
+    while ( (i < rows) & (start_not_found? | end_not_found?) ) {
         int j = 0;
-        while (j < cols) {
-            int node = (i << key_shift) + j;
-            maze_dict~udict_set(key_bit_size, node, maze.at(i).at(j));
-            
+        while ( (j < cols) & (start_not_found? | end_not_found?) ) {
+            if (maze.at(i).at(j) == "S"u) {
+                node_start = (i << key_shift) + j;
+                start_not_found? = false;
+            }
+            if (maze.at(i).at(j) == "E"u) {
+                node_end = (i << key_shift) + j;
+                end_not_found? = false;
+            }
+
             j += 1;
         }
 
         i += 1;
     }
 
-    return(x, q, s, maze, maze_dict);
+    return (node_start, node_end);
 }
 
-;; (int, int, int, tuple, cell) whilewhile(int rows, int cols, tuple maze) method_id {
-;;     (int x, int q, int s, cell maze_dict) = (0, 0, 0, new_dict());
 
-;;     int i = 0;
-;;     while (i < rows) {
-;;         int j = 0;
-;;         while (j < cols) {
-;;             int node = (i << 8) + j;
-;;             maze_dict~udict_set(key_bit_size, node, maze.at(i).at(j));
-            
-;;             j += 1;
-;;         }
+(int, int, int, tuple, tuple, cell) solve_work(int rows, int cols, tuple maze) method_id {
+    (int x, int q, int s, tuple maze_result, cell maze_dict) = (0, 0, 0, empty_tuple(), new_dict());
 
-;;         i += 1;
-;;     }
-;;     return(-1, 0, 0, null(), maze_dict);
-;; }
+    (int node_start, int node_end) = find_start_end_nodes(rows, cols, maze);
+    
+    ;; process input maze
+    maze_dict~udict_set(key_bit_size, node_end, "0");
+
+    ;; generate maze with a path
+    int i = 0;
+    while (i < rows) {
+        int j = 0;
+        tuple row = empty_tuple();
+        while (j < cols) {
+            int cellM = maze.at(i).at(j);
+            if(cellM == "S"u) { cellM = "E"u; }
+            elseif(cellM == "E"u) { cellM = "S"u; }
+            row~tpush(cellM);
+
+            j += 1;
+        }
+        maze_result~tpush(row);
+
+        i += 1;
+    }
+
+    return(node_start, node_end, s, maze, maze_result, maze_dict);
+}
+
 
 (int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
-    (int x, int q, int s, tuple maze_solved, _) = solve_work(n, m, maze);
+    (int x, int q, int s, _, tuple maze_solved, _) = solve_work(n, m, maze);
 
     return(-1, 0, 0, null());
 }
 
-;; (tuple) testt (int n, int m, tuple in_maze) method_id {
-;;     tuple maze = empty_tuple();
-;;     tuple maze_row = empty_tuple();
-;;     maze_row~tpush(".");
-;;     maze_row~tpush("X");
-;;     maze~tpush(maze_row);
-;;     maze_row = empty_tuple();
-;;     maze_row~tpush("S");
-;;     maze_row~tpush("?");
-;;     maze~tpush(maze_row);
-;;     (int x, int q, int s, tuple solved_maze) = solve(2, 2, maze);
-;;     ~dump(x);
-;;     ~dump(q);
-;;     ~dump(s);
-;;     ~dump(solved_maze);
-;;     return in_maze;
-;; }
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 
