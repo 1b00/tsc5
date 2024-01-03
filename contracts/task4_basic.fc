@@ -36,8 +36,8 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     while (i < rows) {
         j = 0;
         while (j < cols) {
-            ;; int node = (i << key_shift) + j;
-            ;; maze_dict~udict_set(key_bit_size, node, maze.at(i).at(j));
+            int node = (i << key_shift) + j;
+            maze_dict~udict_set(key_bit_size, node, "");
             maze_dict.udict_get?(key_bit_size, i << key_shift + j);
             
             j += 1;
