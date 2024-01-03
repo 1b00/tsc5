@@ -39,7 +39,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         i += 1;
     }
 
-    return(-1, j - 2, i - 2, null(), maze_dict);
+    return(-1, j - 2, i - 2, null());
 }
 
 ;; (tuple) testt (int n, int m, tuple in_maze) method_id {
