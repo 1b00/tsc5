@@ -140,7 +140,6 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 }
 
 (int, int, int, tuple, tuple, cell) solve_work(int rows, int cols, tuple maze_input) method_id {
-    tuple maze_result = empty_tuple();
     node_paths = new_dict();
 
     ;; find coordinates of start and end nodes
@@ -197,6 +196,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     }
 
     ;; generate output maze with a path as '!'
+    tuple maze_solved = empty_tuple();
     int i = 0;
     while (i < rows) {
         int j = 0;
@@ -211,12 +211,12 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
             j += 1;
         }
-        maze_result~tpush(row);
+        maze_solved~tpush(row);
 
         i += 1;
     }
 
-    return(x, q, s, maze_input, maze_result, node_paths);
+    return(x, q, s, maze_input, maze_solved, node_paths);
 }
 
 
