@@ -34,36 +34,68 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 }
 
 (int) get_node_value(int node) inline {
-    (slice value, _) = node_paths.udict_get?(KEY_BSIZE, node);
-    return value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE);
+    (slice value, int found?) = node_paths.udict_get?(KEY_BSIZE, node);
+    return found? ? value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE) : MAX_VALUE;
 }
 
 (int, int) unpack_key(int key) inline {
     return (key >> KEY_SHIFT, key & 0x1f);
 }
 
-() update_neighbour(int i, int j, int n, int m, tuple maze, int node_curr, int node_curr_value) {
+() update_neighbour(int i, int j, int n, int m, tuple maze, int node_curr, int node_curr_value) impure {
     ;; skip invalid coordinates
     if ( (i < 0) | (j < 0) | (i >= n) | (j >= m) ) {
         return ();
     }
     int node_neighbour = keygen(i, j);
+    (slice value, int found?) = node_paths.udict_get?(KEY_BSIZE, node_neighbour);
+    ;; skip visited nodes
+    if (found?) {
+        if (value.preload_uint(VISITED_BSIZE)) {
+            return ();
+        }
+    }
     ;; calc value considering obstacle weight
     int node_neighbour_value =
         ((maze.at(i).at(j) == "?"u) ? (1 << Q_SHIFT) : 0) + 
         ((maze.at(i).at(j) == "X"u) ? (1 << X_SHIFT) : 0) + 
         node_curr_value + 1;
-    (slice value, int found?) = node_paths.udict_get?(KEY_BSIZE, node_neighbour);
-    if (found?) {
+    ;; update value if nesessary
+    ifnot (found?) {
+        node_paths~udict_set(KEY_BSIZE, node_neighbour, pack_data(WAS_NOT_VISITED, node_neighbour_value, node_curr));
+    } else {
+        int current_value = value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE);
+        if (node_neighbour_value < current_value) {
+            node_paths~udict_replace?(KEY_BSIZE, node_neighbour, pack_data(WAS_NOT_VISITED, node_neighbour_value, node_curr));
+        }
+    }
+    return ();
+}
+
+(int, int) find_node_min_was_not_visited() inline {
+    (int node_min, int node_min_value) = (0, MAX_VALUE);
+    (int node, slice value, int found?) = node_paths.udict_get_min?(KEY_BSIZE);
+    while (found?) {
         ifnot (value.preload_uint(VISITED_BSIZE)) {
-            ;; update value if nesessary
-            if (node_neighbour_value < value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE)) {
-                node_paths~udict_replace?(KEY_BSIZE, node_neighbour, pack_data(WAS_NOT_VISITED, node_neighbour_value, node_curr));
+            if (value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE) < node_min_value) {
+                node_min = node;
+                node_min_value = value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE);
             }
         }
-    } else {
-        ;; set new value
-        node_paths~udict_add?(KEY_BSIZE, node_neighbour, pack_data(WAS_NOT_VISITED, node_neighbour_value, node_curr));
+        
+        (node, value, found?) = node_paths.udict_get_next?(KEY_BSIZE, node);
+    }
+
+    return (node_min, node_min_value);
+}
+
+() set_node_was_visited(int node) impure inline {
+    (slice value, int found?) = node_paths.udict_get?(KEY_BSIZE, node);
+    if (found?) {
+        node_paths~udict_replace?(KEY_BSIZE, node, pack_data(
+            WAS_VISITED,
+            value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE),
+            value.skip_bits(VISITED_BSIZE + VALUE_BSIZE).preload_uint(KEY_BSIZE)));
     }
 
     return ();
@@ -101,17 +133,16 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     ;; cell node_prev_node = new_dict();
     
     node_paths = new_dict();
-    node_paths~udict_set(KEY_BSIZE, node_start, pack_data(WAS_NOT_VISITED, node_start_value, node_start));
+    ;; node_paths~udict_set(KEY_BSIZE, node_start, pack_data(WAS_NOT_VISITED, node_start_value, node_start));
     ;; node_notvisited~udict_set(KEY_BSIZE, node_start, "");
     ;; node_value~udict_set(KEY_BSIZE, node_start, node_start_value);
     ;; node_prev_node~udict_set(KEY_BSIZE, node_start, node_start);
-    node_paths~udict_set(KEY_BSIZE, node_end,   pack_data(WAS_VISITED, node_end_value,   node_end));
+    node_paths~udict_set(KEY_BSIZE, node_end,   pack_data(WAS_NOT_VISITED, node_end_value,   node_end));
     ;; node_notvisited~udict_set(KEY_BSIZE, node_end, "");
     ;; node_value~udict_set(KEY_BSIZE, node_end, node_end_value);
     ;; node_prev_node~udict_set(KEY_BSIZE, node_end, node_end);
     int node_curr = node_end;
     int node_curr_value = node_end_value;
-    int node_curr_prev = node_end;
     int opt_path_found? = false;
     while(~ opt_path_found?) {
         (int i, int j) = unpack_key(node_curr);
@@ -123,21 +154,8 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         update_neighbour(i + 1, j - 1, n, m, maze, node_curr, node_curr_value);
         update_neighbour(i    , j - 1, n, m, maze, node_curr, node_curr_value);
         update_neighbour(i - 1, j - 1, n, m, maze, node_curr, node_curr_value);
-        node_paths~udict_replace?(KEY_BSIZE, node_curr, pack_data(WAS_VISITED, node_curr_value, node_curr_prev));
-        (int node, slice value, int found?) = node_paths.udict_get_min?(KEY_BSIZE);
-        node_curr_value = MAX_VALUE;
-        while (found?) {
-            ifnot (value.preload_uint(VISITED_BSIZE)) {
-                int val = value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE);
-                int prev = value.skip_bits(VISITED_BSIZE + VALUE_BSIZE).preload_uint(KEY_BSIZE);
-                if (val < node_curr_value) {
-                    node_curr = node;
-                    node_curr_value = val;
-                    node_curr_prev = prev;
-                }
-            }
-            (node, value, found?) = node_paths.udict_get_next?(KEY_BSIZE, node);
-        }
+        set_node_was_visited(node_curr);
+        (node_curr, node_curr_value) = find_node_min_was_not_visited();
         node_start_value = get_node_value(node_start);
         if (node_start_value - 1 < node_curr_value) {
             opt_path_found? = true;
