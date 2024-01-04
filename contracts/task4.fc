@@ -8,15 +8,15 @@
 ;; 63   077     3F  00111111    ?
 
 ;; n = rows, m = cols, max is 31x31
-const int KEY_SHIFT = 5;                ;; 31 takes  5 bits
+const int KEY_SHIFT = 8;                ;; 31 takes  5 bits
 const int KEY_BSIZE = KEY_SHIFT * 2;   ;; 31 << 5 + 31 takes 10 bits
-const int VALUE_BSIZE = 32;             ;; to store 31x31 of Xs (weight 1M)
-const int VISITED_BSIZE = 1;            ;; visited or notvisited node
+const int VALUE_BSIZE = 60;             ;; to store 31x31 of Xs (weight 1M)
+const int VISITED_BSIZE = 8;            ;; visited or notvisited node
 const int MAX_VALUE = (1 << VALUE_BSIZE) - 1;
 const int WAS_VISITED = 1;
 const int WAS_NOT_VISITED = 0;
-const int X_SHIFT = 20;
-const int Q_SHIFT = 10;
+const int X_SHIFT = 40;
+const int Q_SHIFT = 20;
 
 (int) tlen (tuple t) asm "TLEN";
 forall X -> tuple tpush(tuple t, X value) asm "TPUSH";
