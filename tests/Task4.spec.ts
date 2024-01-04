@@ -7,11 +7,11 @@ import { compile } from '@ton-community/blueprint';
 describe('Task4', () => {
     let code: Cell;
 
-    const KEY_SHIFT = 5;                // 31 takes  5 bits
+    const KEY_SHIFT = 8;                // 31 takes  5 bits
     const KEY_BSIZE = KEY_SHIFT * 2; // 31 << 5 + 31 takes 10 bits
-    const VALUE_BSIZE = 32;
+    const VALUE_BSIZE = 60;
     const NODE_PATHS_LEN = 6;
-    const VISITED_BSIZE = 1;
+    const VISITED_BSIZE = 8;
 
     beforeAll(async () => {
         code = await compile('Task4');
