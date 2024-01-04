@@ -71,10 +71,11 @@ describe('Task4Basic', () => {
 
     it('solve_work', async () => {
    
-        const key_shift = 5;                // 31 takes  5 bits
-        const node_bsize = key_shift * 2; // 31 << 5 + 31 takes 10 bits
-        const value_bsize = 32;
-        const path_dict_size = 5;
+        const KEY_SHIFT = 5;                // 31 takes  5 bits
+        const KEY_BSIZE = KEY_SHIFT * 2; // 31 << 5 + 31 takes 10 bits
+        const VALUE_BSIZE = 32;
+        const NODE_PATHS_LEN = 6;
+        const VISITED_BSIZE = 1;
 
         const n = 8;
         const m = 5;
@@ -144,25 +145,29 @@ describe('Task4Basic', () => {
         }
         console.table(maze_result);
 
-        const path_dict = rc.readCell();
-        const path_dict_values = path_dict.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(node_bsize), Dictionary.Values.Uint(value_bsize));
-        const path_dict_nodefroms = path_dict.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(node_bsize), Dictionary.Values.Uint(value_bsize + node_bsize));
-        const path_result_keys = path_dict_values.keys();
-        const path_result_values = path_dict_values.values();
-        const path_result_nodefroms = path_dict_nodefroms.values();
+        const paths = rc.readCell();
+        const paths_visited = paths.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE));
+        const paths_values = paths.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE));
+        const paths_nodefroms = paths.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE + KEY_BSIZE));
+        const path_result_keys = paths_values.keys();
+        const path_result_visited = paths_visited.values();
+        const path_result_values = paths_values.values();
+        const path_result_nodefroms = paths_nodefroms.values();
         const path_result = path_result_keys.flatMap((key, i) => [
-            key >> key_shift,
+            key >> KEY_SHIFT,
             key & 0x1f,
-            path_result_values[i],
-            (path_result_nodefroms[i] & 0x3ff) >> key_shift,
-            path_result_nodefroms[i] & 0x1f
+            path_result_visited[i],
+            BigInt(path_result_values[i] & 0xffffffff) & 0xffffffffn,
+            (path_result_nodefroms[i] & 0x3ff) >> KEY_SHIFT,
+            path_result_nodefroms[i] & 0x1f,
         ]);
         // console.log(path_result);
         const path_table = [];
-        for (var i = 0; i < path_result.length; i += path_dict_size) {
-            path_table.push(path_result.slice(i, i + path_dict_size));
+        for (var i = 0; i < path_result.length; i += NODE_PATHS_LEN) {
+            path_table.push(path_result.slice(i, i + NODE_PATHS_LEN));
         }
         console.table(path_table);
 
