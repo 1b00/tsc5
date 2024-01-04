@@ -10,13 +10,13 @@
 ;; n = rows, m = cols, max is 31x31
 const int KEY_SHIFT = 5;                ;; 31 takes  5 bits
 const int KEY_BSIZE = KEY_SHIFT * 2;   ;; 31 << 5 + 31 takes 10 bits
-const int VALUE_BSIZE = 32;             ;; to store 31x31 of Xs (weight 1M)
+const int VALUE_BSIZE = 24;             ;; to store 31x31 of Xs (weight 1M)
 const int VISITED_BSIZE = 1;            ;; visited or notvisited node
 const int MAX_VALUE = (1 << VALUE_BSIZE) - 1;
 const int WAS_VISITED = 1;
 const int WAS_NOT_VISITED = 0;
-const int X_SHIFT = 20;
-const int Q_SHIFT = 10;
+const int X_SHIFT = 16;
+const int Q_SHIFT = 8;
 
 (int) tlen (tuple t) asm "TLEN";
 forall X -> tuple tpush(tuple t, X value) asm "TPUSH";
@@ -173,7 +173,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     ;; node_paths~store_value(node_start, WAS_NOT_VISITED, node_start_value, node_end);
     node_paths~udict_set(KEY_BSIZE, node_start, sl(WAS_NOT_VISITED, node_start_value, node_end));
     ;; node_paths~store_value(node_end, WAS_VISITED, node_end_value, node_end);
-    node_paths~udict_set(KEY_BSIZE, node_end, sl(WAS_VISITED, node_end_value, node_end));
+    node_paths~udict_set(KEY_BSIZE, node_end, sl(WAS_NOT_VISITED, node_end_value, node_end));
     int node_curr = node_end;
     int node_curr_value = node_end_value;
     int opt_path_found? = false;
