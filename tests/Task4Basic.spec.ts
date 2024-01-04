@@ -69,7 +69,7 @@ describe('Task4Basic', () => {
     //     // expect(op).toBe(108)
     // });
 
-    it('solve_work', async () => {
+    it('solve_work 8x5', async () => {
    
         const KEY_SHIFT = 5;                // 31 takes  5 bits
         const KEY_BSIZE = KEY_SHIFT * 2; // 31 << 5 + 31 takes 10 bits

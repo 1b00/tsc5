@@ -59,11 +59,13 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 }
 
 (slice) sl(int visited, int value, int node_prev) inline {
-    return begin_cell()
-        .store_uint(visited, VISITED_BSIZE)
-        .store_uint(value, VALUE_BSIZE)
-        .store_uint(node_prev, KEY_BSIZE)
-    .end_cell().begin_parse();
+    int v = (visited << (VALUE_BSIZE + KEY_BSIZE)) + (value << KEY_BSIZE) + node_prev;
+    return begin_cell().store_uint(v, VISITED_BSIZE + VALUE_BSIZE + KEY_BSIZE).end_cell().begin_parse();
+    ;; return begin_cell()
+    ;;     .store_uint(visited, VISITED_BSIZE)
+    ;;     .store_uint(value, VALUE_BSIZE)
+    ;;     .store_uint(node_prev, KEY_BSIZE)
+    ;; .end_cell().begin_parse();
 }
 
 (cell, ()) set_node_was_visited(cell node_paths, int node) inline {
@@ -72,10 +74,8 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         node_paths~udict_set(KEY_BSIZE, node, sl(
             WAS_VISITED,
             value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE),
-            value.skip_bits(VISITED_BSIZE + VALUE_BSIZE).preload_uint(KEY_BSIZE)));
-    } else {
-        ~strdump("ALERT: set_node_was_visited but absent!");
-        ~dump(node);
+            value.skip_bits(VISITED_BSIZE + VALUE_BSIZE).preload_uint(KEY_BSIZE))
+        );
     }
 
     return (node_paths, ());
@@ -94,11 +94,14 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
     return (node_paths, ());
 }
-(cell, ()) update_neighbour(cell node_paths, int i, int j, int maze_symbol, int node_prev, int node_prev_value) inline {
+
+(cell, ()) update_neighbour(
+        cell node_paths, int i, int j, int rows, int cols, tuple maze_input,
+        int node_prev, int node_prev_value) inline {
     ;; skip invalid coordinates
-    ;; if ( (i < 0) | (j < 0) | (i >= rows) | (j >= cols) ) {
-    ;;     return (node_paths, ());
-    ;; }
+    if ( (i < 0) | (j < 0) | (i >= rows) | (j >= cols) ) {
+        return (node_paths, ());
+    }
     int node_neighbour = keygen(i, j);
     (slice value, int found?) = node_paths.udict_get?(KEY_BSIZE, node_neighbour);
     ;; skip visited nodes
@@ -109,11 +112,19 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     }
     ;; calc value considering obstacle weight
     int node_neighbour_value =
-        ((maze_symbol == "?"u) ? (1 << Q_SHIFT) : 0) + 
-        ((maze_symbol == "X"u) ? (1 << X_SHIFT) : 0) + 
+        ((maze_input.at(i).at(j) == "?"u) ? (1 << Q_SHIFT) : 0) + 
+        ((maze_input.at(i).at(j) == "X"u) ? (1 << X_SHIFT) : 0) + 
         node_prev_value + 1;
     ;; update value if nesessary
-    node_paths~store_value(node_neighbour, WAS_NOT_VISITED, node_neighbour_value, node_prev);
+    ;; node_paths~store_value(node_neighbour, WAS_NOT_VISITED, node_neighbour_value, node_prev);
+    ifnot (found?) {
+        node_paths~udict_set(KEY_BSIZE, node_neighbour, sl(WAS_NOT_VISITED, node_neighbour_value, node_prev));
+    } else {
+        int current_value = value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE);
+        if (node_neighbour_value < current_value) {
+            node_paths~udict_set(KEY_BSIZE, node_neighbour, sl(WAS_NOT_VISITED, node_neighbour_value, node_prev));
+        }
+    }
 
     return (node_paths, ());
 }
@@ -161,54 +172,56 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     ;; +find min visited
     ;; -find first valid surronding
 
-    node_paths~store_value(node_start, WAS_NOT_VISITED, node_start_value, node_end);
-    node_paths~store_value(node_end, WAS_VISITED, node_end_value, node_end);
+    ;; node_paths~store_value(node_start, WAS_NOT_VISITED, node_start_value, node_end);
+    node_paths~udict_set(KEY_BSIZE, node_start, sl(WAS_NOT_VISITED, node_start_value, node_end));
+    ;; node_paths~store_value(node_end, WAS_VISITED, node_end_value, node_end);
+    node_paths~udict_set(KEY_BSIZE, node_end, sl(WAS_VISITED, node_end_value, node_end));
     int node_curr = node_end;
     int node_curr_value = node_end_value;
     int opt_path_found? = false;
     while(~ opt_path_found?) {
         (int i, int j) = (node_curr >> KEY_SHIFT, node_curr & 0x1f);
-        (int i_next, int j_next) = (i - 1, j);
-        ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
-            node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
-        }
-        (i_next, j_next) = (i - 1, j + 1);
-        ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
-            node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
-        }
-        (i_next, j_next) = (i, j + 1);
-        ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
-            node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
-        }
-        (i_next, j_next) = (i + 1, j + 1);
-        ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
-            node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
-        }
-        (i_next, j_next) = (i + 1, j);
-        ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
-            node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
-        }
-        (i_next, j_next) = (i + 1, j - 1);
-        ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
-            node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
-        }
-        (i_next, j_next) = (i, j - 1);
-        ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
-            node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
-        }
-        (i_next, j_next) = (i - 1, j - 1);
-        ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
-            node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
-        }
+        ;; (int i_next, int j_next) = (i - 1, j);
+        ;; ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
+        ;;     node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
+        ;; }
+        ;; (i_next, j_next) = (i - 1, j + 1);
+        ;; ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
+        ;;     node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
+        ;; }
+        ;; (i_next, j_next) = (i, j + 1);
+        ;; ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
+        ;;     node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
+        ;; }
+        ;; (i_next, j_next) = (i + 1, j + 1);
+        ;; ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
+        ;;     node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
+        ;; }
+        ;; (i_next, j_next) = (i + 1, j);
+        ;; ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
+        ;;     node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
+        ;; }
+        ;; (i_next, j_next) = (i + 1, j - 1);
+        ;; ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
+        ;;     node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
+        ;; }
+        ;; (i_next, j_next) = (i, j - 1);
+        ;; ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
+        ;;     node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
+        ;; }
+        ;; (i_next, j_next) = (i - 1, j - 1);
+        ;; ifnot ( (i_next < 0) | (j_next < 0) | (i_next >= rows) | (j_next >= cols) ) {
+        ;;     node_paths~update_neighbour(i_next, j_next, maze_input.at(i_next).at(j_next), node_curr, node_curr_value);
+        ;; }
 
-        ;; node_paths~update_neighbour(i - 1, j    , rows, cols, maze_input, node_curr, node_curr_value);
-        ;; node_paths~update_neighbour(i - 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value);
-        ;; node_paths~update_neighbour(i    , j + 1, rows, cols, maze_input, node_curr, node_curr_value);
-        ;; node_paths~update_neighbour(i + 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value);
-        ;; node_paths~update_neighbour(i + 1, j    , rows, cols, maze_input, node_curr, node_curr_value);
-        ;; node_paths~update_neighbour(i + 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value);
-        ;; node_paths~update_neighbour(i    , j - 1, rows, cols, maze_input, node_curr, node_curr_value);
-        ;; node_paths~update_neighbour(i - 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i - 1, j    , rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i - 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i    , j + 1, rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i + 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i + 1, j    , rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i + 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i    , j - 1, rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i - 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value);
         node_paths~set_node_was_visited(node_curr);
         (node_curr, node_curr_value) = node_paths~find_node_min_was_not_visited();
         node_start_value = node_paths~get_node_value(node_start);
