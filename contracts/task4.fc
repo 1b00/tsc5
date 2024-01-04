@@ -18,6 +18,8 @@ const int WAS_NOT_VISITED = 0;
 const int X_SHIFT = 20;
 const int Q_SHIFT = 10;
 
+global cell node_paths;
+
 (int) tlen (tuple t) asm "TLEN";
 forall X -> tuple tpush(tuple t, X value) asm "TPUSH";
 forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
@@ -31,19 +33,19 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     return (i << KEY_SHIFT) + j;
 }
 
-(cell, int) get_node_value(cell node_paths, int node) inline {
+(int) get_node_value(int node) inline {
     (slice value, _) = node_paths.udict_get?(KEY_BSIZE, node);
-    return (node_paths, value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE));
+    return value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE);
 }
 
 (int, int) unpack_key(int key) inline {
     return (key >> KEY_SHIFT, key & 0x1f);
 }
 
-(cell, ()) update_neighbour(cell node_paths, int i, int j, int n, int m, tuple maze, int node_curr, int node_curr_value) {
+() update_neighbour(int i, int j, int n, int m, tuple maze, int node_curr, int node_curr_value) {
     ;; skip invalid coordinates
     if ( (i < 0) | (j < 0) | (i >= n) | (j >= m) ) {
-        return (node_paths, ());
+        return ();
     }
     int node_neighbour = keygen(i, j);
     ;; calc value considering obstacle weight
@@ -64,7 +66,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         node_paths~udict_add?(KEY_BSIZE, node_neighbour, pack_data(WAS_NOT_VISITED, node_neighbour_value, node_curr));
     }
 
-    return (node_paths, ());
+    return ();
 }
 
 (int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
@@ -92,24 +94,35 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         i += 1;
     }
     (int node_start_value, int node_end_value) = (MAX_VALUE, 0);
+
+    ;; cell node_visited = new_dict();
+    ;; cell node_notvisited = new_dict();
+    ;; cell node_value = new_dict();
+    ;; cell node_prev_node = new_dict();
     
-    cell node_paths = new_dict();
-    node_paths~udict_set(KEY_BSIZE, node_start, pack_data(WAS_NOT_VISITED, node_start_value, node_end));
-    node_paths~udict_set(KEY_BSIZE, node_end,   pack_data(WAS_NOT_VISITED, node_end_value,   node_end));
+    node_paths = new_dict();
+    node_paths~udict_set(KEY_BSIZE, node_start, pack_data(WAS_NOT_VISITED, node_start_value, node_start));
+    ;; node_notvisited~udict_set(KEY_BSIZE, node_start, "");
+    ;; node_value~udict_set(KEY_BSIZE, node_start, node_start_value);
+    ;; node_prev_node~udict_set(KEY_BSIZE, node_start, node_start);
+    node_paths~udict_set(KEY_BSIZE, node_end,   pack_data(WAS_VISITED, node_end_value,   node_end));
+    ;; node_notvisited~udict_set(KEY_BSIZE, node_end, "");
+    ;; node_value~udict_set(KEY_BSIZE, node_end, node_end_value);
+    ;; node_prev_node~udict_set(KEY_BSIZE, node_end, node_end);
     int node_curr = node_end;
     int node_curr_value = node_end_value;
     int node_curr_prev = node_end;
     int opt_path_found? = false;
     while(~ opt_path_found?) {
         (int i, int j) = unpack_key(node_curr);
-        node_paths~update_neighbour(i - 1, j    , n, m, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i - 1, j + 1, n, m, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i    , j + 1, n, m, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i + 1, j + 1, n, m, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i + 1, j    , n, m, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i + 1, j - 1, n, m, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i    , j - 1, n, m, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i - 1, j - 1, n, m, maze, node_curr, node_curr_value);
+        update_neighbour(i - 1, j    , n, m, maze, node_curr, node_curr_value);
+        update_neighbour(i - 1, j + 1, n, m, maze, node_curr, node_curr_value);
+        update_neighbour(i    , j + 1, n, m, maze, node_curr, node_curr_value);
+        update_neighbour(i + 1, j + 1, n, m, maze, node_curr, node_curr_value);
+        update_neighbour(i + 1, j    , n, m, maze, node_curr, node_curr_value);
+        update_neighbour(i + 1, j - 1, n, m, maze, node_curr, node_curr_value);
+        update_neighbour(i    , j - 1, n, m, maze, node_curr, node_curr_value);
+        update_neighbour(i - 1, j - 1, n, m, maze, node_curr, node_curr_value);
         node_paths~udict_replace?(KEY_BSIZE, node_curr, pack_data(WAS_VISITED, node_curr_value, node_curr_prev));
         (int node, slice value, int found?) = node_paths.udict_get_min?(KEY_BSIZE);
         node_curr_value = MAX_VALUE;
@@ -125,7 +138,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
             }
             (node, value, found?) = node_paths.udict_get_next?(KEY_BSIZE, node);
         }
-        node_start_value = node_paths~get_node_value(node_start);
+        node_start_value = get_node_value(node_start);
         if (node_start_value - 1 < node_curr_value) {
             opt_path_found? = true;
         }        
@@ -145,8 +158,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     }
 
     ;; generate output maze with a path as '!'
-    ;; tuple maze_result = ((1, 1), (2, 2));
-    tuple maze_result = empty_tuple();
+    tuple maze_solved = empty_tuple();
     int i = 0;
     while (i < n) {
         int j = 0;
@@ -161,12 +173,12 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
             j += 1;
         }
-        maze_result~tpush(row);
+        maze_solved~tpush(row);
 
         i += 1;
     }
 
-    return(x, q, s, maze_result);   
+    return(x, q, s, maze_solved);   
 }
 
 
