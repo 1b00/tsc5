@@ -106,11 +106,8 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     int node_curr_value = 0;
     int node_start_value = MAX_VALUE;
     int opt_path_found? = false;
-    int count = 0;
     while(~ opt_path_found?) {
         (int i, int j) = (node_curr >> KEY_SHIFT, node_curr & 0x1f);
-        ~dump(count);
-        count += 1;
         node_paths~update_neighbour(i - 1, j    , rows, cols, maze_input, node_curr, node_curr_value);
         node_paths~update_neighbour(i - 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value);
         node_paths~update_neighbour(i    , j + 1, rows, cols, maze_input, node_curr, node_curr_value);
@@ -164,10 +161,6 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
         i += 1;
     }
-
-    ~dump(x);
-    ~dump(q);
-    ~dump(s);
 
     return(x, q, s, maze_input, maze_solved, node_paths);
 }
