@@ -70,7 +70,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     } else {
         int current_value = value.preload_uint(VALUE_BSIZE);
         if (new_value < current_value) {
-            node_paths~udict_set(KEY_BSIZE, node, pack_data(new_value, node_prev));
+            node_paths~udict_replace?(KEY_BSIZE, node, pack_data(new_value, node_prev));
             node_distances~udict_delete?(VALUE_BSIZE + KEY_BSIZE, (current_value << KEY_BSIZE) + node);
             node_distances~udict_set(VALUE_BSIZE + KEY_BSIZE, (new_value << KEY_BSIZE) + node, "");
         }
@@ -104,7 +104,8 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     ;; find coordinates of start and end nodes
     (int node_start,       int node_end) = find_start_end_nodes(rows, cols, maze_input);
     cell node_paths = new_dict();
-    node_paths~store_value(node_end, 0, node_end);
+    node_paths~udict_set(KEY_BSIZE, node_end, pack_data(0, node_end));
+    node_distances~udict_set(VALUE_BSIZE + KEY_BSIZE, node_end, "");
     node_distances = new_dict();
     node_visited = new_dict();
     int node_curr = node_end;
