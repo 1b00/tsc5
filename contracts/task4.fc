@@ -19,6 +19,7 @@ const int X_SHIFT = 20;
 const int Q_SHIFT = 10;
 
 global cell node_distances;
+global cell node_visited;
 
 (int) tlen (tuple t) asm "TLEN";
 forall X -> tuple tpush(tuple t, X value) asm "TPUSH";
@@ -74,6 +75,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     int node_prev = visited_value_prev.skip_bits(VISITED_BSIZE + VALUE_BSIZE).preload_uint(KEY_BSIZE);
     node_paths~udict_replace?(KEY_BSIZE, node, pack_data(WAS_VISITED, value, node_prev));
     node_distances~udict_delete?(VALUE_BSIZE + KEY_BSIZE, (value << KEY_BSIZE) + node);
+    node_visited~udict_set(KEY_BSIZE, node, "");
 
     return (node_paths, ());
 }
@@ -94,19 +96,23 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
     return (node_paths, ());
 }
-(cell, ()) update_neighbour(cell node_paths, int i, int j, int rows, int cols, tuple maze_input, int node_prev, int node_prev_value) {
+(cell, ()) update_neighbour(cell node_paths, int i, int j, int rows, int cols, tuple maze_input, int node_prev, int node_prev_value) inline {
     ;; skip invalid coordinates
     if ( (i < 0) | (j < 0) | (i >= rows) | (j >= cols) ) {
         return (node_paths, ());
     }
     int node_neighbour = keygen(i, j);
-    (slice value, int found?) = node_paths.udict_get?(KEY_BSIZE, node_neighbour);
     ;; skip visited nodes
+    (slice value, int found?) = node_visited.udict_get?(KEY_BSIZE, node_neighbour);
     if (found?) {
-        if (value.preload_uint(VISITED_BSIZE)) {
-            return (node_paths, ());
-        }
+        return (node_paths, ());
     }
+    ;; (slice value, int found?) = node_paths.udict_get?(KEY_BSIZE, node_neighbour);
+    ;; if (found?) {
+    ;;     if (value.preload_uint(VISITED_BSIZE)) {
+    ;;         return (node_paths, ());
+    ;;     }
+    ;; }
     ;; calc value considering obstacle weight
     int node_neighbour_value =
         ((maze_input.at(i).at(j) == "?"u) ? (1 << Q_SHIFT) : 0) + 
@@ -124,6 +130,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     cell node_paths = new_dict();
     node_paths~store_value(node_end, WAS_NOT_VISITED, 0, node_end);
     node_distances = new_dict();
+    node_visited = new_dict();
     int node_curr = node_end;
     int node_curr_value = 0;
     int node_start_value = MAX_VALUE;
