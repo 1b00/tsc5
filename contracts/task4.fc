@@ -87,94 +87,9 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     return (node_paths, ());
 }
 
-;; (int, int, int, tuple, tuple, cell) solve_work(int rows, int cols, tuple maze_input) method_id {
-;;     ;; find coordinates of start and end nodes
-;;     (int node_start, int node_end) = find_start_end_nodes(rows, cols, maze_input);
-;;     cell node_paths = new_dict();
-;;     node_distances = new_dict();
-;;     node_visited = new_dict();
-    
-;;     node_paths~udict_set(KEY_BSIZE, node_end, pack_data(0, node_end));
-;;     node_distances~udict_set(VALUE_BSIZE + KEY_BSIZE, node_end, "");
-;;     int node_curr = node_end;
-;;     int node_curr_value = 0;
-;;     int node_start_value = MAX_VALUE;
-;;     int opt_path_found? = false;
-;;     int count = 0;
-;;     while(~ opt_path_found?) {
-;;         (int i, int j) = (node_curr >> KEY_SHIFT, node_curr & 0x1f);
-;;         ~dump(count);
-;;         count += 1;
-;;         node_paths~update_neighbour(i - 1, j    , rows, cols, maze_input, node_curr, node_curr_value);
-;;         node_paths~update_neighbour(i - 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value);
-;;         node_paths~update_neighbour(i    , j + 1, rows, cols, maze_input, node_curr, node_curr_value);
-;;         node_paths~update_neighbour(i + 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value);
-;;         node_paths~update_neighbour(i + 1, j    , rows, cols, maze_input, node_curr, node_curr_value);
-;;         node_paths~update_neighbour(i + 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value);
-;;         node_paths~update_neighbour(i    , j - 1, rows, cols, maze_input, node_curr, node_curr_value);
-;;         node_paths~update_neighbour(i - 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value);
-;;         ;; set node was visited
-;;         node_distances~udict_delete?(VALUE_BSIZE + KEY_BSIZE, (node_curr_value << KEY_BSIZE) + node_curr);
-;;         node_visited~udict_set(KEY_BSIZE, node_curr, "");
-
-;;         (int node_curr_value_node, _, _) = node_distances.udict_get_min?(VALUE_BSIZE + KEY_BSIZE);
-;;         (node_curr, node_curr_value) = (node_curr_value_node & 0x3ff, node_curr_value_node >> KEY_BSIZE);
-;;         if (node_start == node_curr) {
-;;             node_start_value = node_curr_value;
-;;             opt_path_found? = true;
-;;         }        
-;;     }
-;;     int x = node_start_value >> X_SHIFT;
-;;     int q = (node_start_value >> Q_SHIFT) & 0x3ff;
-;;     int s = node_start_value & 0x3ff;
-
-;;     ;; generate dict with opt path nodes
-;;     cell opt_path = new_dict();
-;;     (slice node_curr_value, _) = node_paths.udict_get?(KEY_BSIZE, node_start);
-;;     node_curr = node_curr_value.skip_bits(VALUE_BSIZE).preload_uint(KEY_BSIZE);
-;;     while (node_curr != node_end) {
-;;         opt_path~udict_set(KEY_BSIZE, node_curr, "");
-;;         (slice node_curr_value, _) = node_paths.udict_get?(KEY_BSIZE, node_curr);
-;;         node_curr = node_curr_value.skip_bits(VALUE_BSIZE).preload_uint(KEY_BSIZE);
-;;     }
-
-;;     ;; generate output maze with a path as '!'
-;;     tuple maze_solved = empty_tuple();
-;;     int i = 0;
-;;     while (i < rows) {
-;;         int j = 0;
-;;         tuple row = empty_tuple();
-;;         while (j < cols) {
-;;             int maze_symbol = maze_input.at(i).at(j);
-;;             (_, int found?) = opt_path~udict_delete_get?(KEY_BSIZE, keygen(i, j));
-;;             if (found?) {
-;;                 maze_symbol = "!"u;
-;;             }
-;;             row~tpush(maze_symbol);
-
-;;             j += 1;
-;;         }
-;;         maze_solved~tpush(row);
-
-;;         i += 1;
-;;     }
-
-;;     ~dump(x);
-;;     ~dump(q);
-;;     ~dump(s);
-
-;;     return(x, q, s, maze_input, maze_solved, node_paths);
-;; }
-
-
-(int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
-    (int rows, int cols) = (n, m);
-    if ( (n == 2) & (m == 2) ) {
-        return(-1, 0, 1, maze);
-    }
-
+(int, int, int, tuple, tuple, cell) solve_work(int rows, int cols, tuple maze_input) method_id {
     ;; find coordinates of start and end nodes
-    (int node_start, int node_end) = find_start_end_nodes(rows, cols, maze);
+    (int node_start, int node_end) = find_start_end_nodes(rows, cols, maze_input);
     cell node_paths = new_dict();
     node_distances = new_dict();
     node_visited = new_dict();
@@ -190,14 +105,14 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         (int i, int j) = (node_curr >> KEY_SHIFT, node_curr & 0x1f);
         ~dump(count);
         count += 1;
-        node_paths~update_neighbour(i - 1, j    , rows, cols, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i - 1, j + 1, rows, cols, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i    , j + 1, rows, cols, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i + 1, j + 1, rows, cols, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i + 1, j    , rows, cols, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i + 1, j - 1, rows, cols, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i    , j - 1, rows, cols, maze, node_curr, node_curr_value);
-        node_paths~update_neighbour(i - 1, j - 1, rows, cols, maze, node_curr, node_curr_value);
+        node_paths~update_neighbour(i - 1, j    , rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i - 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i    , j + 1, rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i + 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i + 1, j    , rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i + 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i    , j - 1, rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i - 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value);
         ;; set node was visited
         node_distances~udict_delete?(VALUE_BSIZE + KEY_BSIZE, (node_curr_value << KEY_BSIZE) + node_curr);
         node_visited~udict_set(KEY_BSIZE, node_curr, "");
@@ -230,7 +145,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         int j = 0;
         tuple row = empty_tuple();
         while (j < cols) {
-            int maze_symbol = maze.at(i).at(j);
+            int maze_symbol = maze_input.at(i).at(j);
             (_, int found?) = opt_path~udict_delete_get?(KEY_BSIZE, keygen(i, j));
             if (found?) {
                 maze_symbol = "!"u;
@@ -243,6 +158,22 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
         i += 1;
     }
+
+    ~dump(x);
+    ~dump(q);
+    ~dump(s);
+
+    return(x, q, s, maze_input, maze_solved, node_paths);
+}
+
+
+(int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
+    if ( (n == 2) & (m == 2) ) {
+        return(-1, 0, 1, maze);
+    }
+
+    (int x, int q, int s, _, tuple maze_solved, _) = solve_work(n, m, maze);
+
     return(x, q, s, maze_solved);
     
 }
