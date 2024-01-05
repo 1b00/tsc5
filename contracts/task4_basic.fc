@@ -18,6 +18,8 @@ const int WAS_NOT_VISITED = 0;
 const int X_SHIFT = 20;
 const int Q_SHIFT = 10;
 
+global cell node_distances;
+
 (int) tlen (tuple t) asm "TLEN";
 forall X -> tuple tpush(tuple t, X value) asm "TPUSH";
 forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
@@ -67,13 +69,11 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 }
 
 (cell, ()) set_node_was_visited(cell node_paths, int node) inline {
-    (slice value, int found?) = node_paths.udict_get?(KEY_BSIZE, node);
-    if (found?) {
-        node_paths~udict_set(KEY_BSIZE, node, pack_data(
-            WAS_VISITED,
-            value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE),
-            value.skip_bits(VISITED_BSIZE + VALUE_BSIZE).preload_uint(KEY_BSIZE)));
-    }
+    (slice visited_value_prev, _) = node_paths.udict_get?(KEY_BSIZE, node);
+    int value = visited_value_prev.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE);
+    int node_prev = visited_value_prev.skip_bits(VISITED_BSIZE + VALUE_BSIZE).preload_uint(KEY_BSIZE);
+    node_paths~udict_replace?(KEY_BSIZE, node, pack_data(WAS_VISITED, value, node_prev));
+    node_distances~udict_delete?(VALUE_BSIZE + KEY_BSIZE, (value << KEY_BSIZE) + node);
 
     return (node_paths, ());
 }
@@ -82,10 +82,13 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     (slice value, int found?) = node_paths.udict_get?(KEY_BSIZE, node);
     ifnot (found?) {
         node_paths~udict_set(KEY_BSIZE, node, pack_data(visited, new_value, node_prev));
+        node_distances~udict_set(VALUE_BSIZE + KEY_BSIZE, (new_value << KEY_BSIZE) + node, "");
     } else {
         int current_value = value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE);
         if (new_value < current_value) {
             node_paths~udict_set(KEY_BSIZE, node, pack_data(visited, new_value, node_prev));
+            node_distances~udict_delete?(VALUE_BSIZE + KEY_BSIZE, (current_value << KEY_BSIZE) + node);
+            node_distances~udict_set(VALUE_BSIZE + KEY_BSIZE, (new_value << KEY_BSIZE) + node, "");
         }
     }
 
@@ -137,9 +140,24 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     return (node_paths, value.skip_bits(VISITED_BSIZE).preload_uint(VALUE_BSIZE));
 }
 
-(int, int, int, tuple, tuple, cell) solve_work(int rows, int cols, tuple maze_input) method_id {
-    cell node_paths = new_dict();
+;; () print_node_distances(int node_curr, int node_curr_value) impure {
+;;     (int node, _, int found?) = node_distances.udict_get_min?(VALUE_BSIZE + KEY_BSIZE);
+;;     ~strdump("print_node_distances");
+;;     ~dump(node_curr_value);
+;;     ~dump(node_curr >> KEY_SHIFT );
+;;     ~dump(node_curr & 0x1f);
+;;     int i = 0;
+;;     while (found?) {
+;;         ~strdump("---");
+;;         ~dump(node >> KEY_BSIZE);
+;;         ~dump( (node & 0x3ff) >> KEY_SHIFT );
+;;         ~dump(node & 0x1f);
+;;         i += 1;
+;;         (node, _, found?) = node_distances.udict_get_next?(VALUE_BSIZE + KEY_BSIZE, node);
+;;     }
+;; }
 
+(int, int, int, tuple, tuple, cell) solve_work(int rows, int cols, tuple maze_input) method_id {
     ;; find coordinates of start and end nodes
     (int node_start,       int node_end) = find_start_end_nodes(rows, cols, maze_input);
     (int node_start_value, int node_end_value) = (MAX_VALUE, 0);
@@ -157,8 +175,10 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     ;; +find min visited
     ;; -find first valid surronding
 
-    node_paths~store_value(node_start, WAS_NOT_VISITED, node_start_value, node_end);
-    node_paths~store_value(node_end, WAS_VISITED, node_end_value, node_end);
+    cell node_paths = new_dict();
+    ;; node_paths~store_value(node_start, WAS_NOT_VISITED, node_start_value, node_end);
+    node_paths~store_value(node_end, WAS_NOT_VISITED, node_end_value, node_end);
+    node_distances = new_dict();
     int node_curr = node_end;
     int node_curr_value = node_end_value;
     int opt_path_found? = false;
@@ -173,9 +193,10 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         node_paths~update_neighbour(i    , j - 1, rows, cols, maze_input, node_curr, node_curr_value);
         node_paths~update_neighbour(i - 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value);
         node_paths~set_node_was_visited(node_curr);
-        (node_curr, node_curr_value) = node_paths~find_node_min_was_not_visited();
-        node_start_value = node_paths~get_node_value(node_start);
-        if (node_start_value - 1 < node_curr_value) {
+        (int node_curr_value_node, _, _) = node_distances.udict_get_min?(VALUE_BSIZE + KEY_BSIZE);
+        (node_curr, node_curr_value) = (node_curr_value_node & 0x3ff, node_curr_value_node >> KEY_BSIZE);
+        if (node_start == node_curr) {
+            node_start_value = node_curr_value;
             opt_path_found? = true;
         }        
     }
@@ -216,7 +237,6 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
     return(x, q, s, maze_input, maze_solved, node_paths);
 }
-
 
 (int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
     if ( (n == 2) & (m == 2) ) {

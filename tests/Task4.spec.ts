@@ -42,368 +42,368 @@ describe('Task4', () => {
         // blockchain and task4 are ready to use
     });
 
-    // it('solve_work 8x5', async () => {
-    //     const n = 8;
-    //     const m = 5;
-    //     const r1 = new TupleBuilder();
-    //     const r2 = new TupleBuilder();
-    //     const r3 = new TupleBuilder();
-    //     const r4 = new TupleBuilder();
-    //     const r5 = new TupleBuilder();
-    //     const r6 = new TupleBuilder();
-    //     const r7 = new TupleBuilder();
-    //     const r8 = new TupleBuilder();
-    //     // r1.writeString("."); r1.writeString("."); r1.writeString("."); r1.writeString("."); r1.writeString(".");
-    //     r1.writeNumber("S".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); r1.writeNumber("?".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0));
-    //     r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0));
-    //     r3.writeNumber("X".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0)); r3.writeNumber("?".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0));
-    //     r4.writeNumber(".".charCodeAt(0)); r4.writeNumber("?".charCodeAt(0)); r4.writeNumber("?".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0));
-    //     r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("?".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0));
-    //     r6.writeNumber(".".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0));
-    //     r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber("?".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0));
-    //     r8.writeNumber("X".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber("E".charCodeAt(0));
-    //     const maze = new TupleBuilder();
-    //     maze.writeTuple(r1.build());
-    //     maze.writeTuple(r2.build());
-    //     maze.writeTuple(r3.build());
-    //     maze.writeTuple(r4.build());
-    //     maze.writeTuple(r5.build());
-    //     maze.writeTuple(r6.build());
-    //     maze.writeTuple(r7.build());
-    //     maze.writeTuple(r8.build());
-    //     const tb = new TupleBuilder();
-    //     tb.writeNumber(n);
-    //     tb.writeNumber(m);
-    //     tb.writeTuple(maze.build());
+    it('solve_work 8x5', async () => {
+        const n = 8;
+        const m = 5;
+        const r1 = new TupleBuilder();
+        const r2 = new TupleBuilder();
+        const r3 = new TupleBuilder();
+        const r4 = new TupleBuilder();
+        const r5 = new TupleBuilder();
+        const r6 = new TupleBuilder();
+        const r7 = new TupleBuilder();
+        const r8 = new TupleBuilder();
+        // r1.writeString("."); r1.writeString("."); r1.writeString("."); r1.writeString("."); r1.writeString(".");
+        r1.writeNumber("S".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); r1.writeNumber("?".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0));
+        r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0));
+        r3.writeNumber("X".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0)); r3.writeNumber("?".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0));
+        r4.writeNumber(".".charCodeAt(0)); r4.writeNumber("?".charCodeAt(0)); r4.writeNumber("?".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0));
+        r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("?".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0));
+        r6.writeNumber(".".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0));
+        r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber("?".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0));
+        r8.writeNumber("X".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber("E".charCodeAt(0));
+        const maze = new TupleBuilder();
+        maze.writeTuple(r1.build());
+        maze.writeTuple(r2.build());
+        maze.writeTuple(r3.build());
+        maze.writeTuple(r4.build());
+        maze.writeTuple(r5.build());
+        maze.writeTuple(r6.build());
+        maze.writeTuple(r7.build());
+        maze.writeTuple(r8.build());
+        const tb = new TupleBuilder();
+        tb.writeNumber(n);
+        tb.writeNumber(m);
+        tb.writeTuple(maze.build());
         
-    //     const r = await blockchain.runGetMethod(task4.address, "solve_work", tb.build())
+        const r = await blockchain.runGetMethod(task4.address, "solve_work", tb.build())
         
-    //     let rc = r.stackReader;
-    //     const x = rc.readNumber();
-    //     const q = rc.readNumber();
-    //     const s = rc.readNumber();
+        let rc = r.stackReader;
+        const x = rc.readNumber();
+        const q = rc.readNumber();
+        const s = rc.readNumber();
 
-    //     var maze_input_tuple = rc.readTuple();
-    //     var maze_input = [];
-    //     var maze_input_dict_symbols = [];
-    //     for (let i = 0; i < n; i++) {
-    //         var row_result = maze_input_tuple.readTuple()
-    //         for (let j = 0; j < m; j++) {
-    //             maze_input_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
-    //         }
-    //     }
-    //     for (var i=0; i < maze_input_dict_symbols.length; i += m) {
-    //         maze_input.push(maze_input_dict_symbols.slice(i, i + m));
-    //     }
-    //     console.table(maze_input);
+        var maze_input_tuple = rc.readTuple();
+        var maze_input = [];
+        var maze_input_dict_symbols = [];
+        for (let i = 0; i < n; i++) {
+            var row_result = maze_input_tuple.readTuple()
+            for (let j = 0; j < m; j++) {
+                maze_input_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
+            }
+        }
+        for (var i=0; i < maze_input_dict_symbols.length; i += m) {
+            maze_input.push(maze_input_dict_symbols.slice(i, i + m));
+        }
+        console.table(maze_input);
         
-    //     var maze_result_tuple = rc.readTuple();
-    //     var maze_result = [];
-    //     const maze_dict_symbols = [];
-    //     for (let i = 0; i < n; i++) {
-    //         var row_result = maze_result_tuple.readTuple()
-    //         for (let j = 0; j < m; j++) {
-    //             maze_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
-    //         }
-    //     }
-    //     for (var i=0; i < maze_dict_symbols.length; i += m) {
-    //         maze_result.push(maze_dict_symbols.slice(i, i + m));
-    //     }
-    //     console.table(maze_result);
+        var maze_result_tuple = rc.readTuple();
+        var maze_result = [];
+        const maze_dict_symbols = [];
+        for (let i = 0; i < n; i++) {
+            var row_result = maze_result_tuple.readTuple()
+            for (let j = 0; j < m; j++) {
+                maze_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
+            }
+        }
+        for (var i=0; i < maze_dict_symbols.length; i += m) {
+            maze_result.push(maze_dict_symbols.slice(i, i + m));
+        }
+        console.table(maze_result);
 
-    //     const paths = rc.readCell();
-    //     const paths_visited = paths.beginParse()
-    //         .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE));
-    //     const paths_values = paths.beginParse()
-    //         .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE));
-    //     const paths_nodefroms = paths.beginParse()
-    //         .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE + KEY_BSIZE));
-    //     const path_result_keys = paths_values.keys();
-    //     const path_result_visited = paths_visited.values();
-    //     const path_result_values = paths_values.values();
-    //     const path_result_nodefroms = paths_nodefroms.values();
-    //     const path_result = path_result_keys.flatMap((key, i) => [
-    //         key >> KEY_SHIFT,
-    //         key & 0x1f,
-    //         path_result_visited[i],
-    //         BigInt(path_result_values[i] & 0xffffffff) & 0xffffffffn,
-    //         (path_result_nodefroms[i] & 0x3ff) >> KEY_SHIFT,
-    //         path_result_nodefroms[i] & 0x1f,
-    //     ]);
-    //     // console.log(path_result);
-    //     const path_table = [];
-    //     for (var i = 0; i < path_result.length; i += NODE_PATHS_LEN) {
-    //         path_table.push(path_result.slice(i, i + NODE_PATHS_LEN));
-    //     }
-    //     console.table(path_table);
+        const paths = rc.readCell();
+        const paths_visited = paths.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE));
+        const paths_values = paths.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE));
+        const paths_nodefroms = paths.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE + KEY_BSIZE));
+        const path_result_keys = paths_values.keys();
+        const path_result_visited = paths_visited.values();
+        const path_result_values = paths_values.values();
+        const path_result_nodefroms = paths_nodefroms.values();
+        const path_result = path_result_keys.flatMap((key, i) => [
+            key >> KEY_SHIFT,
+            key & 0x1f,
+            path_result_visited[i],
+            BigInt(path_result_values[i] & 0xffffffff) & 0xffffffffn,
+            (path_result_nodefroms[i] & 0x3ff) >> KEY_SHIFT,
+            path_result_nodefroms[i] & 0x1f,
+        ]);
+        // console.log(path_result);
+        const path_table = [];
+        for (var i = 0; i < path_result.length; i += NODE_PATHS_LEN) {
+            path_table.push(path_result.slice(i, i + NODE_PATHS_LEN));
+        }
+        console.table(path_table);
 
-    //     console.log("gasUsed: ", r.gasUsed.toString())
-    //     console.log("x: %d\tq: %d\ts: %d", x, q, s);
+        console.log("gasUsed: ", r.gasUsed.toString())
+        console.log("x: %d\tq: %d\ts: %d", x, q, s);
 
-    //     // console.log("readTuple: ", rc)
-    //     // let op = rc.beginParse().loadUint(32);
-    //     // console.log("loadBits: ", op.toString())
+        // console.log("readTuple: ", rc)
+        // let op = rc.beginParse().loadUint(32);
+        // console.log("loadBits: ", op.toString())
 
-    //     expect(x).toBe(0)
-    //     expect(q).toBe(1)
-    //     expect(s).toBe(7)
-    // });
+        expect(x).toBe(0)
+        expect(q).toBe(1)
+        expect(s).toBe(7)
+    });
 
-    // it('solve_work 8x8', async () => {
-    //     const n = 8;
-    //     const m = 8;
-    //     const r0 = new TupleBuilder();
-    //     const r1 = new TupleBuilder();
-    //     const r2 = new TupleBuilder();
-    //     const r3 = new TupleBuilder();
-    //     const r4 = new TupleBuilder();
-    //     const r5 = new TupleBuilder();
-    //     const r6 = new TupleBuilder();
-    //     const r7 = new TupleBuilder();
+    it('solve_work 8x8', async () => {
+        const n = 8;
+        const m = 8;
+        const r0 = new TupleBuilder();
+        const r1 = new TupleBuilder();
+        const r2 = new TupleBuilder();
+        const r3 = new TupleBuilder();
+        const r4 = new TupleBuilder();
+        const r5 = new TupleBuilder();
+        const r6 = new TupleBuilder();
+        const r7 = new TupleBuilder();
 
-    //     // XXXXXXE.
-    //     // XX.XXXX.
-    //     // X.X.XXXX
-    //     // .?XSXXX.
-    //     // ?.XXXXX.
-    //     // XX..XXX.
-    //     // XX..XX?X
-    //     // XXX...XX
-    //     r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("E".charCodeAt(0)); r0.writeNumber(".".charCodeAt(0)); 
-    //     r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); 
-    //     r2.writeNumber("X".charCodeAt(0)); r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); 
-    //     r3.writeNumber(".".charCodeAt(0)); r3.writeNumber("?".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber("S".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0)); 
-    //     r4.writeNumber("?".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); 
-    //     r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); 
-    //     r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("?".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); 
-    //     r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); 
-    //     const maze = new TupleBuilder();
-    //     maze.writeTuple(r0.build());
-    //     maze.writeTuple(r1.build());
-    //     maze.writeTuple(r2.build());
-    //     maze.writeTuple(r3.build());
-    //     maze.writeTuple(r4.build());
-    //     maze.writeTuple(r5.build());
-    //     maze.writeTuple(r6.build());
-    //     maze.writeTuple(r7.build());
-    //     const tb = new TupleBuilder();
-    //     tb.writeNumber(n);
-    //     tb.writeNumber(m);
-    //     tb.writeTuple(maze.build());
+        // XXXXXXE.
+        // XX.XXXX.
+        // X.X.XXXX
+        // .?XSXXX.
+        // ?.XXXXX.
+        // XX..XXX.
+        // XX..XX?X
+        // XXX...XX
+        r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("E".charCodeAt(0)); r0.writeNumber(".".charCodeAt(0)); 
+        r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); 
+        r2.writeNumber("X".charCodeAt(0)); r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); 
+        r3.writeNumber(".".charCodeAt(0)); r3.writeNumber("?".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber("S".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0)); 
+        r4.writeNumber("?".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); 
+        r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); 
+        r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("?".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); 
+        r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); 
+        const maze = new TupleBuilder();
+        maze.writeTuple(r0.build());
+        maze.writeTuple(r1.build());
+        maze.writeTuple(r2.build());
+        maze.writeTuple(r3.build());
+        maze.writeTuple(r4.build());
+        maze.writeTuple(r5.build());
+        maze.writeTuple(r6.build());
+        maze.writeTuple(r7.build());
+        const tb = new TupleBuilder();
+        tb.writeNumber(n);
+        tb.writeNumber(m);
+        tb.writeTuple(maze.build());
         
-    //     const r = await blockchain.runGetMethod(task4.address, "solve_work", tb.build())
+        const r = await blockchain.runGetMethod(task4.address, "solve_work", tb.build())
         
-    //     let rc = r.stackReader;
-    //     const x = rc.readNumber();
-    //     const q = rc.readNumber();
-    //     const s = rc.readNumber();
+        let rc = r.stackReader;
+        const x = rc.readNumber();
+        const q = rc.readNumber();
+        const s = rc.readNumber();
 
-    //     var maze_input_tuple = rc.readTuple();
-    //     var maze_input = [];
-    //     var maze_input_dict_symbols = [];
-    //     for (let i = 0; i < n; i++) {
-    //         var row_result = maze_input_tuple.readTuple()
-    //         for (let j = 0; j < m; j++) {
-    //             maze_input_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
-    //         }
-    //     }
-    //     for (var i=0; i < maze_input_dict_symbols.length; i += m) {
-    //         maze_input.push(maze_input_dict_symbols.slice(i, i + m));
-    //     }
-    //     console.table(maze_input);
+        var maze_input_tuple = rc.readTuple();
+        var maze_input = [];
+        var maze_input_dict_symbols = [];
+        for (let i = 0; i < n; i++) {
+            var row_result = maze_input_tuple.readTuple()
+            for (let j = 0; j < m; j++) {
+                maze_input_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
+            }
+        }
+        for (var i=0; i < maze_input_dict_symbols.length; i += m) {
+            maze_input.push(maze_input_dict_symbols.slice(i, i + m));
+        }
+        console.table(maze_input);
         
-    //     var maze_result_tuple = rc.readTuple();
-    //     var maze_result = [];
-    //     const maze_dict_symbols = [];
-    //     for (let i = 0; i < n; i++) {
-    //         var row_result = maze_result_tuple.readTuple()
-    //         for (let j = 0; j < m; j++) {
-    //             maze_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
-    //         }
-    //     }
-    //     for (var i=0; i < maze_dict_symbols.length; i += m) {
-    //         maze_result.push(maze_dict_symbols.slice(i, i + m));
-    //     }
-    //     console.table(maze_result);
+        var maze_result_tuple = rc.readTuple();
+        var maze_result = [];
+        const maze_dict_symbols = [];
+        for (let i = 0; i < n; i++) {
+            var row_result = maze_result_tuple.readTuple()
+            for (let j = 0; j < m; j++) {
+                maze_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
+            }
+        }
+        for (var i=0; i < maze_dict_symbols.length; i += m) {
+            maze_result.push(maze_dict_symbols.slice(i, i + m));
+        }
+        console.table(maze_result);
 
-    //     const paths = rc.readCell();
-    //     const paths_visited = paths.beginParse()
-    //         .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE));
-    //     const paths_values = paths.beginParse()
-    //         .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE));
-    //     const paths_nodefroms = paths.beginParse()
-    //         .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE + KEY_BSIZE));
-    //     const path_result_keys = paths_values.keys();
-    //     const path_result_visited = paths_visited.values();
-    //     const path_result_values = paths_values.values();
-    //     const path_result_nodefroms = paths_nodefroms.values();
-    //     const path_result = path_result_keys.flatMap((key, i) => [
-    //         key >> KEY_SHIFT,
-    //         key & 0x1f,
-    //         path_result_visited[i],
-    //         BigInt(path_result_values[i] & 0xffffffff) & 0xffffffffn,
-    //         (path_result_nodefroms[i] & 0x3ff) >> KEY_SHIFT,
-    //         path_result_nodefroms[i] & 0x1f,
-    //     ]);
-    //     // console.log(path_result);
-    //     const path_table = [];
-    //     for (var i = 0; i < path_result.length; i += NODE_PATHS_LEN) {
-    //         path_table.push(path_result.slice(i, i + NODE_PATHS_LEN));
-    //     }
-    //     console.table(path_table);
+        const paths = rc.readCell();
+        const paths_visited = paths.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE));
+        const paths_values = paths.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE));
+        const paths_nodefroms = paths.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE + KEY_BSIZE));
+        const path_result_keys = paths_values.keys();
+        const path_result_visited = paths_visited.values();
+        const path_result_values = paths_values.values();
+        const path_result_nodefroms = paths_nodefroms.values();
+        const path_result = path_result_keys.flatMap((key, i) => [
+            key >> KEY_SHIFT,
+            key & 0x1f,
+            path_result_visited[i],
+            BigInt(path_result_values[i] & 0xffffffff) & 0xffffffffn,
+            (path_result_nodefroms[i] & 0x3ff) >> KEY_SHIFT,
+            path_result_nodefroms[i] & 0x1f,
+        ]);
+        // console.log(path_result);
+        const path_table = [];
+        for (var i = 0; i < path_result.length; i += NODE_PATHS_LEN) {
+            path_table.push(path_result.slice(i, i + NODE_PATHS_LEN));
+        }
+        console.table(path_table);
 
-    //     console.log("gasUsed: ", r.gasUsed.toString())
-    //     console.log("x: %d\tq: %d\ts: %d", x, q, s);
+        console.log("gasUsed: ", r.gasUsed.toString())
+        console.log("x: %d\tq: %d\ts: %d", x, q, s);
 
-    //     // console.log("readTuple: ", rc)
-    //     // let op = rc.beginParse().loadUint(32);
-    //     // console.log("loadBits: ", op.toString())
+        // console.log("readTuple: ", rc)
+        // let op = rc.beginParse().loadUint(32);
+        // console.log("loadBits: ", op.toString())
 
-    //     expect(x).toBe(1)
-    //     expect(q).toBe(1)
-    //     expect(s).toBe(16)
-    // });
+        expect(x).toBe(1)
+        expect(q).toBe(1)
+        expect(s).toBe(16)
+    });
 
-    // it('solve_work 15x10', async () => {
-    //     const n = 15;
-    //     const m = 10;
-    //     const r0 = new TupleBuilder();
-    //     const r1 = new TupleBuilder();
-    //     const r2 = new TupleBuilder();
-    //     const r3 = new TupleBuilder();
-    //     const r4 = new TupleBuilder();
-    //     const r5 = new TupleBuilder();
-    //     const r6 = new TupleBuilder();
-    //     const r7 = new TupleBuilder();
-    //     const r8 = new TupleBuilder();
-    //     const r9 = new TupleBuilder();
-    //     const r10 = new TupleBuilder();
-    //     const r11 = new TupleBuilder();
-    //     const r12 = new TupleBuilder();
-    //     const r13 = new TupleBuilder();
-    //     const r14 = new TupleBuilder();
+    it('solve_work 15x10', async () => {
+        const n = 15;
+        const m = 10;
+        const r0 = new TupleBuilder();
+        const r1 = new TupleBuilder();
+        const r2 = new TupleBuilder();
+        const r3 = new TupleBuilder();
+        const r4 = new TupleBuilder();
+        const r5 = new TupleBuilder();
+        const r6 = new TupleBuilder();
+        const r7 = new TupleBuilder();
+        const r8 = new TupleBuilder();
+        const r9 = new TupleBuilder();
+        const r10 = new TupleBuilder();
+        const r11 = new TupleBuilder();
+        const r12 = new TupleBuilder();
+        const r13 = new TupleBuilder();
+        const r14 = new TupleBuilder();
 
-    //     // XXXXXXE.
-    //     // XX.XXXX.
-    //     // X.X.XXXX
-    //     // .?XSXXX.
-    //     // ?.XXXXX.
-    //     // XX..XXX.
-    //     // XX..XX?X
-    //     // XXX...XX
-    //     r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("E".charCodeAt(0)); r0.writeNumber(".".charCodeAt(0)); r0.writeNumber(".".charCodeAt(0)); r0.writeNumber(".".charCodeAt(0)); 
-    //     r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); 
-    //     r2.writeNumber("X".charCodeAt(0)); r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); 
-    //     r3.writeNumber(".".charCodeAt(0)); r3.writeNumber("?".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber("S".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0));
-    //     r4.writeNumber("?".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0));
-    //     r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); 
-    //     r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("?".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); 
-    //     r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); 
-    //     r8.writeNumber("X".charCodeAt(0)); r8.writeNumber("X".charCodeAt(0)); r8.writeNumber("X".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber("X".charCodeAt(0)); r8.writeNumber("X".charCodeAt(0)); r8.writeNumber("X".charCodeAt(0)); r8.writeNumber("X".charCodeAt(0)); 
-    //     r9.writeNumber("X".charCodeAt(0)); r9.writeNumber("X".charCodeAt(0)); r9.writeNumber("X".charCodeAt(0)); r9.writeNumber(".".charCodeAt(0)); r9.writeNumber(".".charCodeAt(0)); r9.writeNumber(".".charCodeAt(0)); r9.writeNumber("X".charCodeAt(0)); r9.writeNumber("X".charCodeAt(0)); r9.writeNumber("X".charCodeAt(0)); r9.writeNumber("X".charCodeAt(0)); 
-    //     r10.writeNumber("X".charCodeAt(0)); r10.writeNumber("X".charCodeAt(0)); r10.writeNumber("X".charCodeAt(0)); r10.writeNumber(".".charCodeAt(0)); r10.writeNumber(".".charCodeAt(0)); r10.writeNumber(".".charCodeAt(0)); r10.writeNumber("X".charCodeAt(0)); r10.writeNumber("X".charCodeAt(0)); r10.writeNumber("X".charCodeAt(0)); r10.writeNumber("X".charCodeAt(0)); 
-    //     r11.writeNumber("X".charCodeAt(0)); r11.writeNumber("X".charCodeAt(0)); r11.writeNumber("X".charCodeAt(0)); r11.writeNumber(".".charCodeAt(0)); r11.writeNumber(".".charCodeAt(0)); r11.writeNumber(".".charCodeAt(0)); r11.writeNumber("X".charCodeAt(0)); r11.writeNumber("X".charCodeAt(0)); r11.writeNumber("X".charCodeAt(0)); r11.writeNumber("X".charCodeAt(0)); 
-    //     r12.writeNumber("X".charCodeAt(0)); r12.writeNumber("X".charCodeAt(0)); r12.writeNumber("X".charCodeAt(0)); r12.writeNumber(".".charCodeAt(0)); r12.writeNumber(".".charCodeAt(0)); r12.writeNumber(".".charCodeAt(0)); r12.writeNumber("X".charCodeAt(0)); r12.writeNumber("X".charCodeAt(0)); r12.writeNumber("X".charCodeAt(0)); r12.writeNumber("X".charCodeAt(0)); 
-    //     r13.writeNumber("X".charCodeAt(0)); r13.writeNumber("X".charCodeAt(0)); r13.writeNumber("X".charCodeAt(0)); r13.writeNumber(".".charCodeAt(0)); r13.writeNumber(".".charCodeAt(0)); r13.writeNumber(".".charCodeAt(0)); r13.writeNumber("X".charCodeAt(0)); r13.writeNumber("X".charCodeAt(0)); r13.writeNumber("X".charCodeAt(0)); r13.writeNumber("X".charCodeAt(0)); 
-    //     r14.writeNumber("X".charCodeAt(0)); r14.writeNumber("X".charCodeAt(0)); r14.writeNumber("X".charCodeAt(0)); r14.writeNumber(".".charCodeAt(0)); r14.writeNumber(".".charCodeAt(0)); r14.writeNumber(".".charCodeAt(0)); r14.writeNumber("X".charCodeAt(0)); r14.writeNumber("X".charCodeAt(0)); r14.writeNumber("X".charCodeAt(0)); r14.writeNumber("X".charCodeAt(0)); 
-    //     const maze = new TupleBuilder();
-    //     maze.writeTuple(r0.build());
-    //     maze.writeTuple(r1.build());
-    //     maze.writeTuple(r2.build());
-    //     maze.writeTuple(r3.build());
-    //     maze.writeTuple(r4.build());
-    //     maze.writeTuple(r5.build());
-    //     maze.writeTuple(r6.build());
-    //     maze.writeTuple(r7.build());
-    //     maze.writeTuple(r8.build());
-    //     maze.writeTuple(r9.build());
-    //     maze.writeTuple(r10.build());
-    //     maze.writeTuple(r11.build());
-    //     maze.writeTuple(r12.build());
-    //     maze.writeTuple(r13.build());
-    //     maze.writeTuple(r14.build());
-    //     const tb = new TupleBuilder();
-    //     tb.writeNumber(n);
-    //     tb.writeNumber(m);
-    //     tb.writeTuple(maze.build());
+        // XXXXXXE.
+        // XX.XXXX.
+        // X.X.XXXX
+        // .?XSXXX.
+        // ?.XXXXX.
+        // XX..XXX.
+        // XX..XX?X
+        // XXX...XX
+        r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("X".charCodeAt(0)); r0.writeNumber("E".charCodeAt(0)); r0.writeNumber(".".charCodeAt(0)); r0.writeNumber(".".charCodeAt(0)); r0.writeNumber(".".charCodeAt(0)); 
+        r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber("X".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); r1.writeNumber(".".charCodeAt(0)); 
+        r2.writeNumber("X".charCodeAt(0)); r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber(".".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); r2.writeNumber("X".charCodeAt(0)); 
+        r3.writeNumber(".".charCodeAt(0)); r3.writeNumber("?".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber("S".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber("X".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0)); r3.writeNumber(".".charCodeAt(0));
+        r4.writeNumber("?".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber("X".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0)); r4.writeNumber(".".charCodeAt(0));
+        r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber("X".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); r5.writeNumber(".".charCodeAt(0)); 
+        r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber(".".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("?".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); r6.writeNumber("X".charCodeAt(0)); 
+        r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber(".".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); r7.writeNumber("X".charCodeAt(0)); 
+        r8.writeNumber("X".charCodeAt(0)); r8.writeNumber("X".charCodeAt(0)); r8.writeNumber("X".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber(".".charCodeAt(0)); r8.writeNumber("X".charCodeAt(0)); r8.writeNumber("X".charCodeAt(0)); r8.writeNumber("X".charCodeAt(0)); r8.writeNumber("X".charCodeAt(0)); 
+        r9.writeNumber("X".charCodeAt(0)); r9.writeNumber("X".charCodeAt(0)); r9.writeNumber("X".charCodeAt(0)); r9.writeNumber(".".charCodeAt(0)); r9.writeNumber(".".charCodeAt(0)); r9.writeNumber(".".charCodeAt(0)); r9.writeNumber("X".charCodeAt(0)); r9.writeNumber("X".charCodeAt(0)); r9.writeNumber("X".charCodeAt(0)); r9.writeNumber("X".charCodeAt(0)); 
+        r10.writeNumber("X".charCodeAt(0)); r10.writeNumber("X".charCodeAt(0)); r10.writeNumber("X".charCodeAt(0)); r10.writeNumber(".".charCodeAt(0)); r10.writeNumber(".".charCodeAt(0)); r10.writeNumber(".".charCodeAt(0)); r10.writeNumber("X".charCodeAt(0)); r10.writeNumber("X".charCodeAt(0)); r10.writeNumber("X".charCodeAt(0)); r10.writeNumber("X".charCodeAt(0)); 
+        r11.writeNumber("X".charCodeAt(0)); r11.writeNumber("X".charCodeAt(0)); r11.writeNumber("X".charCodeAt(0)); r11.writeNumber(".".charCodeAt(0)); r11.writeNumber(".".charCodeAt(0)); r11.writeNumber(".".charCodeAt(0)); r11.writeNumber("X".charCodeAt(0)); r11.writeNumber("X".charCodeAt(0)); r11.writeNumber("X".charCodeAt(0)); r11.writeNumber("X".charCodeAt(0)); 
+        r12.writeNumber("X".charCodeAt(0)); r12.writeNumber("X".charCodeAt(0)); r12.writeNumber("X".charCodeAt(0)); r12.writeNumber(".".charCodeAt(0)); r12.writeNumber(".".charCodeAt(0)); r12.writeNumber(".".charCodeAt(0)); r12.writeNumber("X".charCodeAt(0)); r12.writeNumber("X".charCodeAt(0)); r12.writeNumber("X".charCodeAt(0)); r12.writeNumber("X".charCodeAt(0)); 
+        r13.writeNumber("X".charCodeAt(0)); r13.writeNumber("X".charCodeAt(0)); r13.writeNumber("X".charCodeAt(0)); r13.writeNumber(".".charCodeAt(0)); r13.writeNumber(".".charCodeAt(0)); r13.writeNumber(".".charCodeAt(0)); r13.writeNumber("X".charCodeAt(0)); r13.writeNumber("X".charCodeAt(0)); r13.writeNumber("X".charCodeAt(0)); r13.writeNumber("X".charCodeAt(0)); 
+        r14.writeNumber("X".charCodeAt(0)); r14.writeNumber("X".charCodeAt(0)); r14.writeNumber("X".charCodeAt(0)); r14.writeNumber(".".charCodeAt(0)); r14.writeNumber(".".charCodeAt(0)); r14.writeNumber(".".charCodeAt(0)); r14.writeNumber("X".charCodeAt(0)); r14.writeNumber("X".charCodeAt(0)); r14.writeNumber("X".charCodeAt(0)); r14.writeNumber("X".charCodeAt(0)); 
+        const maze = new TupleBuilder();
+        maze.writeTuple(r0.build());
+        maze.writeTuple(r1.build());
+        maze.writeTuple(r2.build());
+        maze.writeTuple(r3.build());
+        maze.writeTuple(r4.build());
+        maze.writeTuple(r5.build());
+        maze.writeTuple(r6.build());
+        maze.writeTuple(r7.build());
+        maze.writeTuple(r8.build());
+        maze.writeTuple(r9.build());
+        maze.writeTuple(r10.build());
+        maze.writeTuple(r11.build());
+        maze.writeTuple(r12.build());
+        maze.writeTuple(r13.build());
+        maze.writeTuple(r14.build());
+        const tb = new TupleBuilder();
+        tb.writeNumber(n);
+        tb.writeNumber(m);
+        tb.writeTuple(maze.build());
         
-    //     const r = await blockchain.runGetMethod(task4.address, "solve_work", tb.build())
+        const r = await blockchain.runGetMethod(task4.address, "solve_work", tb.build())
         
-    //     let rc = r.stackReader;
-    //     const x = rc.readNumber();
-    //     const q = rc.readNumber();
-    //     const s = rc.readNumber();
+        let rc = r.stackReader;
+        const x = rc.readNumber();
+        const q = rc.readNumber();
+        const s = rc.readNumber();
 
-    //     var maze_input_tuple = rc.readTuple();
-    //     var maze_input = [];
-    //     var maze_input_dict_symbols = [];
-    //     for (let i = 0; i < n; i++) {
-    //         var row_result = maze_input_tuple.readTuple()
-    //         for (let j = 0; j < m; j++) {
-    //             maze_input_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
-    //         }
-    //     }
-    //     for (var i=0; i < maze_input_dict_symbols.length; i += m) {
-    //         maze_input.push(maze_input_dict_symbols.slice(i, i + m));
-    //     }
-    //     console.table(maze_input);
+        var maze_input_tuple = rc.readTuple();
+        var maze_input = [];
+        var maze_input_dict_symbols = [];
+        for (let i = 0; i < n; i++) {
+            var row_result = maze_input_tuple.readTuple()
+            for (let j = 0; j < m; j++) {
+                maze_input_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
+            }
+        }
+        for (var i=0; i < maze_input_dict_symbols.length; i += m) {
+            maze_input.push(maze_input_dict_symbols.slice(i, i + m));
+        }
+        console.table(maze_input);
         
-    //     var maze_result_tuple = rc.readTuple();
-    //     var maze_result = [];
-    //     const maze_dict_symbols = [];
-    //     for (let i = 0; i < n; i++) {
-    //         var row_result = maze_result_tuple.readTuple()
-    //         for (let j = 0; j < m; j++) {
-    //             maze_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
-    //         }
-    //     }
-    //     for (var i=0; i < maze_dict_symbols.length; i += m) {
-    //         maze_result.push(maze_dict_symbols.slice(i, i + m));
-    //     }
-    //     console.table(maze_result);
+        var maze_result_tuple = rc.readTuple();
+        var maze_result = [];
+        const maze_dict_symbols = [];
+        for (let i = 0; i < n; i++) {
+            var row_result = maze_result_tuple.readTuple()
+            for (let j = 0; j < m; j++) {
+                maze_dict_symbols.push(String.fromCharCode(row_result.readNumber()));
+            }
+        }
+        for (var i=0; i < maze_dict_symbols.length; i += m) {
+            maze_result.push(maze_dict_symbols.slice(i, i + m));
+        }
+        console.table(maze_result);
 
-    //     const paths = rc.readCell();
-    //     const paths_visited = paths.beginParse()
-    //         .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE));
-    //     const paths_values = paths.beginParse()
-    //         .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE));
-    //     const paths_nodefroms = paths.beginParse()
-    //         .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE + KEY_BSIZE));
-    //     const path_result_keys = paths_values.keys();
-    //     const path_result_visited = paths_visited.values();
-    //     const path_result_values = paths_values.values();
-    //     const path_result_nodefroms = paths_nodefroms.values();
-    //     const path_result = path_result_keys.flatMap((key, i) => [
-    //         key >> KEY_SHIFT,
-    //         key & 0x1f,
-    //         path_result_visited[i],
-    //         BigInt(path_result_values[i] & 0xffffffff) & 0xffffffffn,
-    //         (path_result_nodefroms[i] & 0x3ff) >> KEY_SHIFT,
-    //         path_result_nodefroms[i] & 0x1f,
-    //     ]);
-    //     // console.log(path_result);
-    //     const path_table = [];
-    //     for (var i = 0; i < path_result.length; i += NODE_PATHS_LEN) {
-    //         path_table.push(path_result.slice(i, i + NODE_PATHS_LEN));
-    //     }
-    //     console.table(path_table);
+        const paths = rc.readCell();
+        const paths_visited = paths.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE));
+        const paths_values = paths.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE));
+        const paths_nodefroms = paths.beginParse()
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE + KEY_BSIZE));
+        const path_result_keys = paths_values.keys();
+        const path_result_visited = paths_visited.values();
+        const path_result_values = paths_values.values();
+        const path_result_nodefroms = paths_nodefroms.values();
+        const path_result = path_result_keys.flatMap((key, i) => [
+            key >> KEY_SHIFT,
+            key & 0x1f,
+            path_result_visited[i],
+            BigInt(path_result_values[i] & 0xffffffff) & 0xffffffffn,
+            (path_result_nodefroms[i] & 0x3ff) >> KEY_SHIFT,
+            path_result_nodefroms[i] & 0x1f,
+        ]);
+        // console.log(path_result);
+        const path_table = [];
+        for (var i = 0; i < path_result.length; i += NODE_PATHS_LEN) {
+            path_table.push(path_result.slice(i, i + NODE_PATHS_LEN));
+        }
+        console.table(path_table);
 
-    //     console.log("gasUsed: ", r.gasUsed.toString())
-    //     console.log("x: %d\tq: %d\ts: %d", x, q, s);
+        console.log("gasUsed: ", r.gasUsed.toString())
+        console.log("x: %d\tq: %d\ts: %d", x, q, s);
 
-    //     // console.log("readTuple: ", rc)
-    //     // let op = rc.beginParse().loadUint(32);
-    //     // console.log("loadBits: ", op.toString())
+        // console.log("readTuple: ", rc)
+        // let op = rc.beginParse().loadUint(32);
+        // console.log("loadBits: ", op.toString())
 
-    //     // expect(x).toBe(1)
-    //     // expect(q).toBe(1)
-    //     // expect(s).toBe(16)
-    // });
+        // expect(x).toBe(1)
+        // expect(q).toBe(1)
+        // expect(s).toBe(16)
+    });
 
 
     it('solve_work 31x31', async () => {
         const n = 15;
-        const m = 31;
+        const m = 20;
         const r0 = new TupleBuilder();
         const r1 = new TupleBuilder();
         const r2 = new TupleBuilder();
