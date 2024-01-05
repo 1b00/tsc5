@@ -26,10 +26,6 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     return (i << KEY_SHIFT) + j;
 }
 
-(int, int) unpack_key(int key) inline {
-    return (key >> KEY_SHIFT, key & 0x1f);
-}
-
 (int, int) find_start_end_nodes(int rows, int cols, tuple maze) {
     int start_not_found? = true;
     int end_not_found? = true;
@@ -40,11 +36,12 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     while ( (i < rows) & (start_not_found? | end_not_found?) ) {
         int j = 0;
         while ( (j < cols) & (start_not_found? | end_not_found?) ) {
-            if (maze.at(i).at(j) == "S"u) {
+            int maze_symbol = maze.at(i).at(j);
+            if (maze_symbol == "S"u) {
                 node_start = keygen(i, j);
                 start_not_found? = false;
             }
-            if (maze.at(i).at(j) == "E"u) {
+            if (maze_symbol == "E"u) {
                 node_end = keygen(i, j);
                 end_not_found? = false;
             }
@@ -62,22 +59,6 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     return begin_cell().store_uint((distance << KEY_BSIZE) + node_prev, VALUE_BSIZE + KEY_BSIZE).end_cell().begin_parse();
 }
 
-(cell, ()) store_value(cell node_paths, int node, int new_value, int node_prev) inline {
-    (slice value, int found?) = node_paths.udict_get?(KEY_BSIZE, node);
-    ifnot (found?) {
-        node_paths~udict_set(KEY_BSIZE, node, pack_data(new_value, node_prev));
-        node_distances~udict_set(VALUE_BSIZE + KEY_BSIZE, (new_value << KEY_BSIZE) + node, "");
-    } else {
-        int current_value = value.preload_uint(VALUE_BSIZE);
-        if (new_value < current_value) {
-            node_paths~udict_replace?(KEY_BSIZE, node, pack_data(new_value, node_prev));
-            node_distances~udict_delete?(VALUE_BSIZE + KEY_BSIZE, (current_value << KEY_BSIZE) + node);
-            node_distances~udict_set(VALUE_BSIZE + KEY_BSIZE, (new_value << KEY_BSIZE) + node, "");
-        }
-    }
-
-    return (node_paths, ());
-}
 (cell, ()) update_neighbour(cell node_paths, int i, int j, int rows, int cols, tuple maze_input, int node_prev, int node_prev_value) inline {
     ;; skip invalid coordinates
     if ( (i < 0) | (j < 0) | (i >= rows) | (j >= cols) ) {
@@ -85,35 +66,51 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     }
     int node_neighbour = keygen(i, j);
     ;; skip visited nodes
-    (slice value, int found?) = node_visited.udict_get?(KEY_BSIZE, node_neighbour);
+    (_, int found?) = node_visited.udict_get?(KEY_BSIZE, node_neighbour);
     if (found?) {
         return (node_paths, ());
     }
     ;; calc value considering obstacle weight
+    int maze_symbol = maze_input.at(i).at(j);
     int node_neighbour_value =
-        ((maze_input.at(i).at(j) == "?"u) ? (1 << Q_SHIFT) : 0) + 
-        ((maze_input.at(i).at(j) == "X"u) ? (1 << X_SHIFT) : 0) + 
+        ((maze_symbol == "?"u) ? (1 << Q_SHIFT) : 0) + 
+        ((maze_symbol == "X"u) ? (1 << X_SHIFT) : 0) + 
         node_prev_value + 1;
     ;; update value if nesessary
-    node_paths~store_value(node_neighbour, node_neighbour_value, node_prev);
+    (slice value, int found?) = node_paths.udict_get?(KEY_BSIZE, node_neighbour);
+    ifnot (found?) {
+        node_paths~udict_set(KEY_BSIZE, node_neighbour, pack_data(node_neighbour_value, node_prev));
+        node_distances~udict_set(VALUE_BSIZE + KEY_BSIZE, (node_neighbour_value << KEY_BSIZE) + node_neighbour, "");
+    } else {
+        int current_value = value.preload_uint(VALUE_BSIZE);
+        if (node_neighbour_value < current_value) {
+            node_paths~udict_replace?(KEY_BSIZE, node_neighbour, pack_data(node_neighbour_value, node_prev));
+            node_distances~udict_delete?(VALUE_BSIZE + KEY_BSIZE, (current_value << KEY_BSIZE) + node_neighbour);
+            node_distances~udict_set(VALUE_BSIZE + KEY_BSIZE, (node_neighbour_value << KEY_BSIZE) + node_neighbour, "");
+        }
+    }
 
     return (node_paths, ());
 }
 
 (int, int, int, tuple, tuple, cell) solve_work(int rows, int cols, tuple maze_input) method_id {
     ;; find coordinates of start and end nodes
-    (int node_start,       int node_end) = find_start_end_nodes(rows, cols, maze_input);
+    (int node_start, int node_end) = find_start_end_nodes(rows, cols, maze_input);
     cell node_paths = new_dict();
-    node_paths~udict_set(KEY_BSIZE, node_end, pack_data(0, node_end));
-    node_distances~udict_set(VALUE_BSIZE + KEY_BSIZE, node_end, "");
     node_distances = new_dict();
     node_visited = new_dict();
+    
+    node_paths~udict_set(KEY_BSIZE, node_end, pack_data(0, node_end));
+    node_distances~udict_set(VALUE_BSIZE + KEY_BSIZE, node_end, "");
     int node_curr = node_end;
     int node_curr_value = 0;
     int node_start_value = MAX_VALUE;
     int opt_path_found? = false;
+    int count = 0;
     while(~ opt_path_found?) {
         (int i, int j) = (node_curr >> KEY_SHIFT, node_curr & 0x1f);
+        ~dump(count);
+        count += 1;
         node_paths~update_neighbour(i - 1, j    , rows, cols, maze_input, node_curr, node_curr_value);
         node_paths~update_neighbour(i - 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value);
         node_paths~update_neighbour(i    , j + 1, rows, cols, maze_input, node_curr, node_curr_value);
@@ -154,12 +151,12 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         int j = 0;
         tuple row = empty_tuple();
         while (j < cols) {
-            int cellM = maze_input.at(i).at(j);
+            int maze_symbol = maze_input.at(i).at(j);
             (_, int found?) = opt_path~udict_delete_get?(KEY_BSIZE, keygen(i, j));
             if (found?) {
-                cellM = "!"u;
+                maze_symbol = "!"u;
             }
-            row~tpush(cellM);
+            row~tpush(maze_symbol);
 
             j += 1;
         }
@@ -167,6 +164,10 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
         i += 1;
     }
+
+    ~dump(x);
+    ~dump(q);
+    ~dump(s);
 
     return(x, q, s, maze_input, maze_solved, node_paths);
 }
