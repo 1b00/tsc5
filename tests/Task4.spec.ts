@@ -10,8 +10,7 @@ describe('Task4', () => {
     const KEY_SHIFT = 5;                // 31 takes  5 bits
     const KEY_BSIZE = KEY_SHIFT * 2; // 31 << 5 + 31 takes 10 bits
     const VALUE_BSIZE = 32;
-    const NODE_PATHS_LEN = 6;
-    const VISITED_BSIZE = 1;
+    const NODE_PATHS_LEN = 5;
 
     beforeAll(async () => {
         code = await compile('Task4');
@@ -112,20 +111,16 @@ describe('Task4', () => {
         console.table(maze_result);
 
         const paths = rc.readCell();
-        const paths_visited = paths.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE));
         const paths_values = paths.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE));
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VALUE_BSIZE));
         const paths_nodefroms = paths.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE + KEY_BSIZE));
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VALUE_BSIZE + KEY_BSIZE));
         const path_result_keys = paths_values.keys();
-        const path_result_visited = paths_visited.values();
         const path_result_values = paths_values.values();
         const path_result_nodefroms = paths_nodefroms.values();
         const path_result = path_result_keys.flatMap((key, i) => [
             key >> KEY_SHIFT,
             key & 0x1f,
-            path_result_visited[i],
             BigInt(path_result_values[i] & 0xffffffff) & 0xffffffffn,
             (path_result_nodefroms[i] & 0x3ff) >> KEY_SHIFT,
             path_result_nodefroms[i] & 0x1f,
@@ -227,20 +222,16 @@ describe('Task4', () => {
         console.table(maze_result);
 
         const paths = rc.readCell();
-        const paths_visited = paths.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE));
         const paths_values = paths.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE));
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VALUE_BSIZE));
         const paths_nodefroms = paths.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE + KEY_BSIZE));
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VALUE_BSIZE + KEY_BSIZE));
         const path_result_keys = paths_values.keys();
-        const path_result_visited = paths_visited.values();
         const path_result_values = paths_values.values();
         const path_result_nodefroms = paths_nodefroms.values();
         const path_result = path_result_keys.flatMap((key, i) => [
             key >> KEY_SHIFT,
             key & 0x1f,
-            path_result_visited[i],
             BigInt(path_result_values[i] & 0xffffffff) & 0xffffffffn,
             (path_result_nodefroms[i] & 0x3ff) >> KEY_SHIFT,
             path_result_nodefroms[i] & 0x1f,
@@ -363,20 +354,16 @@ describe('Task4', () => {
         console.table(maze_result);
 
         const paths = rc.readCell();
-        const paths_visited = paths.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE));
         const paths_values = paths.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE));
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VALUE_BSIZE));
         const paths_nodefroms = paths.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE + KEY_BSIZE));
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VALUE_BSIZE + KEY_BSIZE));
         const path_result_keys = paths_values.keys();
-        const path_result_visited = paths_visited.values();
         const path_result_values = paths_values.values();
         const path_result_nodefroms = paths_nodefroms.values();
         const path_result = path_result_keys.flatMap((key, i) => [
             key >> KEY_SHIFT,
             key & 0x1f,
-            path_result_visited[i],
             BigInt(path_result_values[i] & 0xffffffff) & 0xffffffffn,
             (path_result_nodefroms[i] & 0x3ff) >> KEY_SHIFT,
             path_result_nodefroms[i] & 0x1f,
@@ -542,20 +529,16 @@ describe('Task4', () => {
         console.table(maze_result);
 
         const paths = rc.readCell();
-        const paths_visited = paths.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE));
         const paths_values = paths.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE));
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VALUE_BSIZE));
         const paths_nodefroms = paths.beginParse()
-            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VISITED_BSIZE + VALUE_BSIZE + KEY_BSIZE));
+            .loadDictDirect(Dictionary.Keys.Uint(KEY_BSIZE), Dictionary.Values.Uint(VALUE_BSIZE + KEY_BSIZE));
         const path_result_keys = paths_values.keys();
-        const path_result_visited = paths_visited.values();
         const path_result_values = paths_values.values();
         const path_result_nodefroms = paths_nodefroms.values();
         const path_result = path_result_keys.flatMap((key, i) => [
             key >> KEY_SHIFT,
             key & 0x1f,
-            path_result_visited[i],
             BigInt(path_result_values[i] & 0xffffffff) & 0xffffffffn,
             (path_result_nodefroms[i] & 0x3ff) >> KEY_SHIFT,
             path_result_nodefroms[i] & 0x1f,
