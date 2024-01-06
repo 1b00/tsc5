@@ -40,7 +40,7 @@ cell migrate_one(cell old_storage) { ;; it's just a placeholder that is required
     
     ;; storage = process_message(storage, msg_value, my_balance, in_msg_full, payload.begin_parse());
 
-    ;; set_data(wrap_storage(-2, storage)); ;; -2 is just a random placeholder for the version
+    set_data(wrap_storage(-2, storage)); ;; -2 is just a random placeholder for the version
 
 }
 
