@@ -173,7 +173,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     ;; ~dump(q);
     ;; ~dump(s);
 
-    return(x, q, s, maze_input, maze_solved, node_paths);
+    return(-1, q, s, maze_input, maze_solved, node_paths);
 }
 
 (int, int, int, tuple) solve(int n, int m, tuple maze) method_id {
