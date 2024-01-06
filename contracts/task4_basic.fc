@@ -59,6 +59,10 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     if ( (i < 0) | (j < 0) | (i >= rows) | (j >= cols) ) {
         return (node_paths, ());
     }
+    int maze_symbol = maze_input.at(i).at(j);
+    if (maze_symbol == "X"u) {
+        return (node_paths, ());
+    }
     int node_neighbour = keygen(i, j);
     ;; skip visited nodes
     (_, int found?) = node_visited.udict_get?(KEY_BSIZE, node_neighbour);
@@ -66,7 +70,6 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         return (node_paths, ());
     }
     ;; calc value considering obstacle weight
-    int maze_symbol = maze_input.at(i).at(j);
     int node_neighbour_value =
         ((maze_symbol == "?"u) ? (1 << Q_SHIFT) : 0) + 
         ((maze_symbol == "X"u) ? (1 << X_SHIFT) : 0) + 
@@ -121,8 +124,11 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         node_distances~udict_delete?(VALUE_BSIZE + KEY_BSIZE, (node_curr_value << KEY_BSIZE) + node_curr);
         node_visited~udict_set(KEY_BSIZE, node_curr, NO_VALUE);
 
-        (int node_curr_value_node, _, _) = node_distances.udict_get_min?(VALUE_BSIZE + KEY_BSIZE);
+        (int node_curr_value_node, _, int min_found?) = node_distances.udict_get_min?(VALUE_BSIZE + KEY_BSIZE);
         (node_curr, node_curr_value) = (node_curr_value_node & 0x3ff, node_curr_value_node >> KEY_BSIZE);
+        ifnot (min_found?) {
+            return(-1, 0, 0, empty_tuple(), empty_tuple(), new_dict());
+        }
         if (node_start == node_curr) {
             node_start_value = node_curr_value + 1;
             opt_path_found? = true;
