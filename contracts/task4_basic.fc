@@ -183,7 +183,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
 
     (int x, int q, int s, _, tuple maze_solved, _) = solve_work(n, m, maze);
 
-    return(-1, q, s, maze_solved);
+    return(x, q, s, maze_solved);
     
 }
 
