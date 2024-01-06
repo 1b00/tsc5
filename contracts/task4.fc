@@ -170,7 +170,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     return(x, q, s, maze_input, maze_solved, node_paths);
 }
 
-(int, int, int, tuple, tuple, cell) solve_work_16x30() {
+(int, int, int, tuple, tuple, cell) solve_work_16x30() method_id {
     (int n, int m) = (16, 30);
     tuple maze_input = empty_tuple();
     tuple s_row = empty_tuple();
@@ -217,7 +217,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     
 }
 
-(int, int, int) solve_work_32x32() {
+(int, int, int) solve_work_32x32() method_id {
     (int n, int m) = (32, 32);
     tuple maze_input = empty_tuple();
     tuple s_row = empty_tuple();
