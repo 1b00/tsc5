@@ -1,5 +1,8 @@
 #include "imports/stdlib.fc";
 
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+
+}
 
 ;; <<<<< Custom version-specific code begins
 ;; This section (everything between << and >> characters) will be fully substituted for each version.
@@ -49,91 +52,91 @@ int version() method_id {
     return get_data().begin_parse().preload_uint(32);
 }
 
-() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-;; () recv_internal(int msg_value, int balance, cell in_msg_full, slice in_msg_body) impure {
-    ;; expected_version:uint32 new_code:(Maybe ^Cell) migrations:(HashmapE 32 MigrationPayload) payload:^Cell = InternalMsgBody;
-    ;;                      new_version:uint32 migration_code:(Maybe ^Cell) = MigrationPayload;
-    int expected_version = in_msg_body~load_uint(32);
-    ;; Next is a bit indicating whether update code is attached. If the bit is set to 1, it is followed by the update code in a reference.
-    cell new_code = in_msg_body~load_maybe_ref();
-    cell migrations = in_msg_body~load_dict();
-    cell payload = in_msg_body~load_ref();
+;; () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+;; ;; () recv_internal(int msg_value, int balance, cell in_msg_full, slice in_msg_body) impure {
+;;     ;; expected_version:uint32 new_code:(Maybe ^Cell) migrations:(HashmapE 32 MigrationPayload) payload:^Cell = InternalMsgBody;
+;;     ;;                      new_version:uint32 migration_code:(Maybe ^Cell) = MigrationPayload;
+;;     int expected_version = in_msg_body~load_uint(32);
+;;     ;; Next is a bit indicating whether update code is attached. If the bit is set to 1, it is followed by the update code in a reference.
+;;     cell new_code = in_msg_body~load_maybe_ref();
+;;     cell migrations = in_msg_body~load_dict();
+;;     cell payload = in_msg_body~load_ref();
 
-    ;; Hey, I put the recv_internal function from the bottom of the file to the top, fully replicating the template in terms of function order,
-    ;; and it made me pass the tests right away from 4/10. Maybe you have a similar issue?
-    ;; Oh and I left the msg_value and balance as they were in the task, I didn't try swapping them yet so not sure if that matters at all.
-    ;; Did you use set_code in addition to set_c3? That got me from 3/10 to 4/10 then I did what Andy said to get to 10/10
-    ;; No I used only set_c3 :( We should use set_c3 for both migration_code and new_code right?
-    ;; Yes and set_code for new_code
-    ;; If expected_version == current_version, we do not need to set_code(new_code) right? Only have to call process_message and set_data
-    ;; Yes, also make sure to not migrate the storage if there are missing links in the migration chain
-    ;; how do we transfrom cell to cont?
-    ;; set_c3(code.begin_parse().bless());
-    ;; storage.process_message(...) will not work, but process_message(storage, ...) will.
-    ;; Does this mean that the migrations dictionary would be empty? Or the migration code would be empty cell?
-    ;; No. It'd be a normal dictionary, it'd have a key 1 and the value would be 4 and then no migration code in a reference (according to TLB)
-    ;; TLB can be confusing, don't hesitate to ask more if you don't understand something.
+;;     ;; Hey, I put the recv_internal function from the bottom of the file to the top, fully replicating the template in terms of function order,
+;;     ;; and it made me pass the tests right away from 4/10. Maybe you have a similar issue?
+;;     ;; Oh and I left the msg_value and balance as they were in the task, I didn't try swapping them yet so not sure if that matters at all.
+;;     ;; Did you use set_code in addition to set_c3? That got me from 3/10 to 4/10 then I did what Andy said to get to 10/10
+;;     ;; No I used only set_c3 :( We should use set_c3 for both migration_code and new_code right?
+;;     ;; Yes and set_code for new_code
+;;     ;; If expected_version == current_version, we do not need to set_code(new_code) right? Only have to call process_message and set_data
+;;     ;; Yes, also make sure to not migrate the storage if there are missing links in the migration chain
+;;     ;; how do we transfrom cell to cont?
+;;     ;; set_c3(code.begin_parse().bless());
+;;     ;; storage.process_message(...) will not work, but process_message(storage, ...) will.
+;;     ;; Does this mean that the migrations dictionary would be empty? Or the migration code would be empty cell?
+;;     ;; No. It'd be a normal dictionary, it'd have a key 1 and the value would be 4 and then no migration code in a reference (according to TLB)
+;;     ;; TLB can be confusing, don't hesitate to ask more if you don't understand something.
 
 
-    ;; Let's agree that the first call to the smart contract will occur with expected_version = 0, followed by an empty migrations dictionary.
-    ;; During this first call, your template must set the version to 1 for future interactions and finish the execution.
-    ;; if ( (expected_version == 0) & (migrations.dict_empty?())) { ;; ??? & (migrations.dict_empty?())
+;;     ;; Let's agree that the first call to the smart contract will occur with expected_version = 0, followed by an empty migrations dictionary.
+;;     ;; During this first call, your template must set the version to 1 for future interactions and finish the execution.
+;;     ;; if ( (expected_version == 0) & (migrations.dict_empty?())) { ;; ??? & (migrations.dict_empty?())
 
-    ;; ;; ---
-    ;; ;; here you should check if it's the first call or not based on `expected_version` as stated in the task
-    ;; ;; if it is the first call, wrap the storage and finish execution by returning from the function
-    ;; ;; ---
+;;     ;; ;; ---
+;;     ;; ;; here you should check if it's the first call or not based on `expected_version` as stated in the task
+;;     ;; ;; if it is the first call, wrap the storage and finish execution by returning from the function
+;;     ;; ;; ---
 
-    slice ds = get_data().begin_parse();
-    int current_version = ds~load_uint(32);
-    cell storage = ds~load_ref();   
+;;     slice ds = get_data().begin_parse();
+;;     int current_version = ds~load_uint(32);
+;;     cell storage = ds~load_ref();   
 
-    if (expected_version == 0) { ;; ??? & (migrations.dict_empty?())
-        current_version = 1;
-        set_data(wrap_storage(current_version, storage));
-        return ();
-    }
-    throw_if(200, expected_version < current_version);
+;;     if (expected_version == 0) { ;; ??? & (migrations.dict_empty?())
+;;         current_version = 1;
+;;         set_data(wrap_storage(current_version, storage));
+;;         return ();
+;;     }
+;;     throw_if(200, expected_version < current_version);
 
-    if (expected_version > current_version) {
-        ;; if the update is needed but update code isn't attached, it throws an error 200.
-        throw_if(200, cell_null?(new_code));
+;;     if (expected_version > current_version) {
+;;         ;; if the update is needed but update code isn't attached, it throws an error 200.
+;;         throw_if(200, cell_null?(new_code));
 
-        ;; expected_version:uint32 new_code:(Maybe ^Cell) migrations:(HashmapE 32 MigrationPayload) payload:^Cell = InternalMsgBody;
-        ;;                      new_version:uint32 migration_code:(Maybe ^Cell) = MigrationPayload;
-        cell migrations_todo = new_dict();
-        int from_version = current_version;
-        (slice migration_payload, int continue_migration?) = migrations.udict_get?(32, from_version);
-        throw_unless(400, continue_migration?);
-        while (continue_migration?) {
-            int new_version = migration_payload~load_uint(32);
-            throw_unless(400, new_version > from_version);
-            throw_if(400, new_version > expected_version);
-            cell migration_code = migration_payload~load_maybe_ref();
-            ifnot (cell_null?(migration_code)) {
-                migrations_todo~udict_set(32, new_version, migration_code.begin_parse());
-            }
-            if (new_version == expected_version) {
-                continue_migration? = false;
-            } else {
-                from_version = new_version;
-                (migration_payload, continue_migration?) = migrations.udict_get?(32, from_version);
-                throw_unless(400, continue_migration?);
-            }
-        }
-        (int new_version, slice migration_code, int continue_migration?) = migrations_todo.udict_get_min?(32);
-        while (continue_migration?) {
-            set_c3(migration_code.bless());
-            set_data(wrap_storage(new_version, migrate_one(get_storage())));
-            (new_version, migration_code, continue_migration?) = migrations_todo.udict_get_next?(32, new_version);
-        }
+;;         ;; expected_version:uint32 new_code:(Maybe ^Cell) migrations:(HashmapE 32 MigrationPayload) payload:^Cell = InternalMsgBody;
+;;         ;;                      new_version:uint32 migration_code:(Maybe ^Cell) = MigrationPayload;
+;;         cell migrations_todo = new_dict();
+;;         int from_version = current_version;
+;;         (slice migration_payload, int continue_migration?) = migrations.udict_get?(32, from_version);
+;;         throw_unless(400, continue_migration?);
+;;         while (continue_migration?) {
+;;             int new_version = migration_payload~load_uint(32);
+;;             throw_unless(400, new_version > from_version);
+;;             throw_if(400, new_version > expected_version);
+;;             cell migration_code = migration_payload~load_maybe_ref();
+;;             ifnot (cell_null?(migration_code)) {
+;;                 migrations_todo~udict_set(32, new_version, migration_code.begin_parse());
+;;             }
+;;             if (new_version == expected_version) {
+;;                 continue_migration? = false;
+;;             } else {
+;;                 from_version = new_version;
+;;                 (migration_payload, continue_migration?) = migrations.udict_get?(32, from_version);
+;;                 throw_unless(400, continue_migration?);
+;;             }
+;;         }
+;;         (int new_version, slice migration_code, int continue_migration?) = migrations_todo.udict_get_min?(32);
+;;         while (continue_migration?) {
+;;             set_c3(migration_code.bless());
+;;             set_data(wrap_storage(new_version, migrate_one(get_storage())));
+;;             (new_version, migration_code, continue_migration?) = migrations_todo.udict_get_next?(32, new_version);
+;;         }
 
-        set_code(new_code);
-        set_c3(new_code.begin_parse().bless());
+;;         set_code(new_code);
+;;         set_c3(new_code.begin_parse().bless());
 
-        current_version = expected_version;
-    }
+;;         current_version = expected_version;
+;;     }
 
-    storage = process_message(storage, msg_value, my_balance, in_msg_full, payload.begin_parse());
-    set_data(wrap_storage(current_version, storage));
-}
+;;     storage = process_message(storage, msg_value, my_balance, in_msg_full, payload.begin_parse());
+;;     set_data(wrap_storage(current_version, storage));
+;; }
