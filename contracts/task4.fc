@@ -54,7 +54,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     return begin_cell().store_uint((distance << KEY_BSIZE) + node_prev, VALUE_BSIZE + KEY_BSIZE);
 }
 
-(cell, ()) update_neighbour(cell node_paths, int i, int j, int rows, int cols, tuple maze_input, int node_prev, int node_prev_value, int node_start) {
+(cell, ()) update_neighbour(cell node_paths, int i, int j, int rows, int cols, tuple maze_input, int node_prev, int node_prev_value, int node_start) inline {
     ;; skip invalid coordinates
     if ( (i < 0) | (j < 0) | (i >= rows) | (j >= cols) ) {
         return (node_paths, ());
