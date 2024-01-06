@@ -1,5 +1,54 @@
 #include "imports/stdlib.fc";
 
+
+;; <<<<< Custom version-specific code begins
+;; This section (everything between << and >> characters) will be fully substituted for each version.
+;; This is an IMPORTANT part, and these exact lines with <<<<< and >>>>> must be present in your code for the testing system to work correctly.
+;; All the code provided here serves as an example of the version-code, which your update code must be compatible with.
+;; Refer to the "3-example" directory for more version examples.
+
+;; from counter-v0.fc
+cell process_message(cell storage, int msg_value, int balance, cell in_msg_full, slice in_msg_body) impure {
+    slice cs = storage.begin_parse();
+    int current_amount = cs.preload_uint(32);
+    return begin_cell().store_uint(current_amount + 1, 32).end_cell();
+}
+
+cell migrate_one(cell old_storage) { ;; it's just a placeholder that is required for correct compilation
+    return old_storage;
+}
+
+;; Custom version-specific code ends >>>>>
+
+
+;; () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+
+;; }
+
+cell get_storage() {
+    slice cs = get_data().begin_parse();
+
+    cs~load_uint(32); ;; skip version
+
+    ;; Logic to extract the storage on which the version-specific process_message and get-methods operate
+    cell storage = cs~load_ref();
+
+    return storage;
+}
+
+cell wrap_storage(int version_id, cell storage) {
+    ;; add additional data required for versioning in this cell
+    return begin_cell()
+        .store_uint(version_id, 32)
+        .store_ref(storage)
+    .end_cell();
+}
+
+;; Return the current version of the smart contract
+int version() method_id {
+    return get_data().begin_parse().preload_uint(32);
+}
+
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 ;; () recv_internal(int msg_value, int balance, cell in_msg_full, slice in_msg_body) impure {
     ;; expected_version:uint32 new_code:(Maybe ^Cell) migrations:(HashmapE 32 MigrationPayload) payload:^Cell = InternalMsgBody;
@@ -86,50 +135,5 @@
     }
 
     storage = process_message(storage, msg_value, my_balance, in_msg_full, payload.begin_parse());
-
     set_data(wrap_storage(current_version, storage));
-
 }
-
-cell get_storage() {
-    slice cs = get_data().begin_parse();
-
-    cs~load_uint(32); ;; skip version
-
-    ;; Logic to extract the storage on which the version-specific process_message and get-methods operate
-    cell storage = cs~load_ref();
-
-    return storage;
-}
-
-cell wrap_storage(int version_id, cell storage) {
-    ;; add additional data required for versioning in this cell
-    return begin_cell()
-        .store_uint(version_id, 32)
-        .store_ref(storage)
-    .end_cell();
-}
-
-;; Return the current version of the smart contract
-int version() method_id {
-    return get_data().begin_parse().preload_uint(32);
-}
-
-;; <<<<< Custom version-specific code begins
-;; This section (everything between << and >> characters) will be fully substituted for each version.
-;; This is an IMPORTANT part, and these exact lines with <<<<< and >>>>> must be present in your code for the testing system to work correctly.
-;; All the code provided here serves as an example of the version-code, which your update code must be compatible with.
-;; Refer to the "3-example" directory for more version examples.
-
-;; from counter-v0.fc
-cell process_message(cell storage, int msg_value, int balance, cell in_msg_full, slice in_msg_body) impure {
-    slice cs = storage.begin_parse();
-    int current_amount = cs.preload_uint(32);
-    return begin_cell().store_uint(current_amount + 1, 32).end_cell();
-}
-
-cell migrate_one(cell old_storage) { ;; it's just a placeholder that is required for correct compilation
-    return old_storage;
-}
-
-;; Custom version-specific code ends >>>>>
