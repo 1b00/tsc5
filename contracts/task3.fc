@@ -28,11 +28,25 @@
 ;; You may delete and rewrite as needed,
 ;; but the final implementation must adhere to the same structure
 
+global int current_version;
+
+;; recv_internal
+;;     Handles internal messages from users.
+;;     Checks if an update is necessary.
+;;     if an update is needed - it migrates the storage and updates the contract code; if the update is needed but update code isn't attached, it throws an error 200.
+;;     Executes process_message and updates storage.
 () recv_internal(int msg_value, int balance, cell in_msg_full, slice in_msg_body) impure {
-    in_msg_body~skip_bits(32); ;; Skip the expected version
-    in_msg_body~load_maybe_ref(); ;; Skip the expected code
-    in_msg_body~load_dict(); ;; Skip migrations
+    int expected_version = in_msg_body~load_uint(32); ;; Skip the expected version
+    cell expected_code = in_msg_body~load_maybe_ref(); ;; Skip the expected code
+    cell migrations = in_msg_body~load_dict(); ;; Skip migrations
     cell payload = in_msg_body~load_ref();
+    
+    ;; Let's agree that the first call to the smart contract will occur with expected_version = 0, followed by an empty migrations dictionary.
+    ;; During this first call, your template must set the version to 1 for future interactions and finish the execution.
+    if ((expected_version == 0) & (migrations.dict_empty?())) {
+        current_version = 1;
+        return ();
+    }
 
     ;; ---
     ;; here you should check if it's the first call or not based on `expected_version` as stated in the task
@@ -47,6 +61,7 @@
     set_data(wrap_storage(-2, storage)); ;; -2 is just a random placeholder for the version
 }
 
+;; cell get_storage() - Returns the main smart contract's unwrapped storage.
 cell get_storage() {
     slice cs = get_data().begin_parse();
 
@@ -56,6 +71,7 @@ cell get_storage() {
     return storage;
 }
 
+;; cell wrap_storage(int version_id, cell storage) - Wraps the main contract's storage with versioning data.
 cell wrap_storage(int version_id, cell storage) {
     ;; add additional data required for versioning in this cell
     return begin_cell()
@@ -63,6 +79,7 @@ cell wrap_storage(int version_id, cell storage) {
     .end_cell();
 }
 
+;; int version() method_id - Returns the smart contract's current version.
 ;; Return the current version of the smart contract
 int version() method_id {
     return -2; ;; Not implemented
