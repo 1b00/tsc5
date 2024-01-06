@@ -44,7 +44,7 @@
 ;; but the final implementation must adhere to the same structure
 
 
-;; global int version_current;
+global int version_current;
 
 
 ;; recv_internal
