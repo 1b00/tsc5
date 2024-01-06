@@ -633,7 +633,7 @@ describe('Task4', () => {
 
     it('solve_work_32x32', async () => {   
         const methodName = 'solve_work_32x32';
-        const r = await blockchain.runGetMethod(task4.address, methodName, [],  {gasLimit: 1000_000_000n})
+        const r = await blockchain.runGetMethod(task4.address, methodName, [],  {gasLimit: 100_000_000n})
         
         let rc = r.stackReader;
         const x = rc.readNumber();
