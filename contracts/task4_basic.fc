@@ -125,10 +125,10 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         node_visited~udict_set(KEY_BSIZE, node_curr, NO_VALUE);
 
         (int node_curr_value_node, _, int min_found?) = node_distances.udict_get_min?(VALUE_BSIZE + KEY_BSIZE);
-        (node_curr, node_curr_value) = (node_curr_value_node & 0x3ff, node_curr_value_node >> KEY_BSIZE);
         ifnot (min_found?) {
-            return(-1, 0, 0, empty_tuple(), empty_tuple(), new_dict());
+            return(1, 0, 0, empty_tuple(), empty_tuple(), new_dict());
         }
+        (node_curr, node_curr_value) = (node_curr_value_node & 0x3ff, node_curr_value_node >> KEY_BSIZE);
         if (node_start == node_curr) {
             node_start_value = node_curr_value + 1;
             opt_path_found? = true;
