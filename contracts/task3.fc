@@ -1,11 +1,12 @@
 #include "imports/stdlib.fc";
 
-;; Hey, I put the recv_internal function from the bottom of the file to the top, fully replicating the template in terms of function order, and it made me pass the tests right away from 4/10. Maybe you have a similar issue?
+;; Hey, I put the recv_internal function from the bottom of the file to the top, fully replicating the template in terms of function order,
+;;  and it made me pass the tests right away from 4/10. Maybe you have a similar issue?
 ;; Oh and I left the msg_value and balance as they were in the task, I didn't try swapping them yet so not sure if that matters at all.
 ;; Did you use set_code in addition to set_c3? That got me from 3/10 to 4/10 then I did what Andy said to get to 10/10
 ;; No I used only set_c3 :( We should use set_c3 for both migration_code and new_code right?
 ;; Yes and set_code for new_code
-;; If expected_version == current_version, we do not need to set_code(new_code) right? Only have to call process_message and set_data
+;; If version_expected == version_current, we do not need to set_code(new_code) right? Only have to call process_message and set_data
 ;; Yes, also make sure to not migrate the storage if there are missing links in the migration chain
 ;; how do we transfrom cell to cont?
 ;; set_c3(code.begin_parse().bless());
@@ -28,28 +29,99 @@
 ;; You may delete and rewrite as needed,
 ;; but the final implementation must adhere to the same structure
 
-global int current_version;
+int cell_null?(cell c) asm "ISNULL";
+
+global int version_current;
 
 ;; recv_internal
 ;;     Handles internal messages from users.
 ;;     Checks if an update is necessary.
-;;     if an update is needed - it migrates the storage and updates the contract code; if the update is needed but update code isn't attached, it throws an error 200.
+;;     if an update is needed - it migrates the storage and updates the contract code;
+;;       if the update is needed but update code isn't attached, it throws an error 200.
 ;;     Executes process_message and updates storage.
 () recv_internal(int msg_value, int balance, cell in_msg_full, slice in_msg_body) impure {
-    int expected_version = in_msg_body~load_uint(32); ;; Skip the expected version
-    cell expected_code = in_msg_body~load_maybe_ref(); ;; Skip the expected code
+    ;; expected_version:uint32 new_code:(Maybe ^Cell) migrations:(HashmapE 32 MigrationPayload) payload:^Cell = InternalMsgBody;
+    ;;                      new_version:uint32 migration_code:(Maybe ^Cell) = MigrationPayload;
+
+    ;; The first 32 bits indicate the expected version of the contract.
+    int version_expected = in_msg_body~load_uint(32); ;; Skip the expected version
+    ;; Next is a bit indicating whether update code is attached. If the bit is set to 1, it is followed by the update code in a reference.
+    cell new_code = in_msg_body~load_maybe_ref(); ;; Skip the expected code
+    ;; A dictionary containing migrations: from_version => MigrationPayload.
     cell migrations = in_msg_body~load_dict(); ;; Skip migrations
+    ;; payload, which is the pure payload passed to process_message.
+    ;; This payload is what the smart contract would receive if it were to operate without versioning functionality.
     cell payload = in_msg_body~load_ref();
     
-    ;; Let's agree that the first call to the smart contract will occur with expected_version = 0, followed by an empty migrations dictionary.
+    ;; Let's agree that the first call to the smart contract will occur with version_expected = 0, followed by an empty migrations dictionary.
     ;; During this first call, your template must set the version to 1 for future interactions and finish the execution.
-    if ((expected_version == 0) & (migrations.dict_empty?())) {
-        current_version = 1;
+    if ( (version_expected == 0) & (migrations.dict_empty?())) { ;; ???
+        version_current = 1;
         return ();
     }
 
+    if (version_expected < version_current) {
+        return (); ;; ???
+    }
+
+    if (version_expected > version_current) {
+        ;; if the update is needed but update code isn't attached, it throws an error 200.
+        throw_if(200, cell_null?(new_code));
+
+        ;; upgrade_data(src, query_id, new_data);
+        ;; migrations.dict_empty?()
+
+        ;; expected_version:uint32 new_code:(Maybe ^Cell) migrations:(HashmapE 32 MigrationPayload) payload:^Cell = InternalMsgBody;
+        ;;                      new_version:uint32 migration_code:(Maybe ^Cell) = MigrationPayload;
+        cell migrations_todo = new_dict();
+        ;; iterate keys from small to big
+        int version_from = version_current;
+        (slice migration_payload, int migration_found?) = migrations.udict_get?(32, version_from);
+        throw_unless(400, migration_found?);
+        while (migration_found?) {
+            int version_to = migration_payload~load_uint(32);
+            throw_unless(400, version_to > version_from);
+            throw_if(400, version_to > version_expected);
+            cell migration_code = migration_payload~load_maybe_ref();
+            ifnot (cell_null?(migration_code)) {
+                migrations_todo~udict_set(32, version_to, migration_code.begin_parse());
+            }
+            ;; do something with pair from_version->migration_payload
+            ;; if (from_version == version_expected) {
+                ;; set_c3(migration_code);
+                ;; cell migrate_one(cell old_storage);
+            ;; }
+            if (version_to == version_expected) {
+                migration_found? = false;
+            } else {
+                version_from = version_to;
+                (migration_payload, migration_found?) = migrations.udict_get?(32, version_from);
+            }
+        }
+
+        ;; iterate keys from small to big
+        (int version_to, slice migration_code, int migration_found?) = migrations_todo.udict_get_min?(32);
+        while (migration_found?) {
+            set_c3(migration_code.bless());
+            set_data(wrap_storage(version_to, migrate_one(get_storage())));
+            (version_to, migration_code, migration_found?) = migrations_todo.udict_get_next?(32, version_to);
+        }
+
+        set_code(new_code);
+        set_c3(new_code.begin_parse().bless());
+        version_current = version_expected;
+    }
+
+    ;; Your wrapper should also include checks for missing links in the migration chain.
+    ;; For instance, if there is an attempt to upgrade from version 1 to 4,
+    ;; but the migration dictionary only contains migrations for 1 -> 2 and 3 -> 4,
+    ;; it should identify this gap and throw an error 400.
+    ;; This is because it cannot manage the storage format changes that occur in the missing version.
+    ;; Additionaly, it's important to ensure that both the current and the expected versions are included in the migrations dictionary provided in an incoming message.
+    ;; If either of these versions is not present in the dictionary, the wrapper should throw an error 400.
+
     ;; ---
-    ;; here you should check if it's the first call or not based on `expected_version` as stated in the task
+    ;; here you should check if it's the first call or not based on `version_expected` as stated in the task
     ;; if it is the first call, wrap the storage and finish execution by returning from the function
     ;; ---
 
@@ -62,6 +134,7 @@ global int current_version;
 }
 
 ;; cell get_storage() - Returns the main smart contract's unwrapped storage.
+;; Ensure get_storage returns the storage used in process_message.
 cell get_storage() {
     slice cs = get_data().begin_parse();
 
@@ -82,7 +155,8 @@ cell wrap_storage(int version_id, cell storage) {
 ;; int version() method_id - Returns the smart contract's current version.
 ;; Return the current version of the smart contract
 int version() method_id {
-    return -2; ;; Not implemented
+    return version_current;
+    ;; return -2; ;; Not implemented
 }
 
 ;; <<<<< Custom version-specific code begins
