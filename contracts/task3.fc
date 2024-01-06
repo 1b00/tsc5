@@ -1,3 +1,5 @@
+#include "imports/stdlib.fc";
+
 ;; All the code in recv_internal, get_storage, wrap_storage, and version
 ;; serves as an example of the intended structure.
 
