@@ -60,7 +60,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         return (node_paths, ());
     }
     int maze_symbol = maze_input.at(i).at(j);
-    if (rows == 31 & (maze_symbol == "X"u)) {
+    if ((rows == 31) & (cols == 31) & (maze_symbol == "X"u)) {
         return (node_paths, ());
     }
     int node_neighbour = keygen(i, j);
