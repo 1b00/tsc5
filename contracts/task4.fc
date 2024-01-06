@@ -8,12 +8,12 @@
 ;; 69   105     45  01000101    E
 
 ;; n = rows, m = cols, max is 31x31
-const int KEY_SHIFT = 6;                ;; 31 takes  5 bits
+const int KEY_SHIFT = 5;                ;; 31 takes  5 bits
 const int KEY_BSIZE = KEY_SHIFT * 2;   ;; 31 << 5 + 31 takes 10 bits
-const int VALUE_BSIZE = 64;             ;; to store 31x31 of Xs (weight 1M)
+const int VALUE_BSIZE = 36;             ;; to store 31x31 of Xs (weight 1M)
 const int MAX_VALUE = (1 << VALUE_BSIZE) - 1;
-const int X_SHIFT = 30;
-const int Q_SHIFT = 15;
+const int X_SHIFT = 22;
+const int Q_SHIFT = 11;
 const slice NO_VALUE = "";
 
 global cell node_distances;
