@@ -57,16 +57,16 @@
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
     ;; expected_version:uint32 new_code:(Maybe ^Cell) migrations:(HashmapE 32 MigrationPayload) payload:^Cell = InternalMsgBody;
     ;;                      new_version:uint32 migration_code:(Maybe ^Cell) = MigrationPayload;
-    ;; int version_expected = in_msg_body~load_uint(32);
+    int version_expected = in_msg_body~load_uint(32);
     ;; ;; Next is a bit indicating whether update code is attached. If the bit is set to 1, it is followed by the update code in a reference.
-    ;; cell new_code = in_msg_body~load_maybe_ref();
-    ;; cell migrations = in_msg_body~load_dict();
-    ;; cell payload = in_msg_body~load_ref();
+    cell new_code = in_msg_body~load_maybe_ref();
+    cell migrations = in_msg_body~load_dict();
+    cell payload = in_msg_body~load_ref();
     
     ;; ;; Let's agree that the first call to the smart contract will occur with version_expected = 0, followed by an empty migrations dictionary.
     ;; ;; During this first call, your template must set the version to 1 for future interactions and finish the execution.
     if ( (version_expected == 0) & (migrations.dict_empty?())) { ;; ??? & (migrations.dict_empty?())
-        version_current = 1;
+        ;; version_current = 1;
         return ();
     }
 
