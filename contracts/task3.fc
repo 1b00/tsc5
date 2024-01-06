@@ -44,7 +44,7 @@
 ;; but the final implementation must adhere to the same structure
 
 
-global int version_current;
+;; global int version_current;
 
 
 ;; recv_internal
@@ -65,10 +65,10 @@ global int version_current;
     
     ;; ;; Let's agree that the first call to the smart contract will occur with version_expected = 0, followed by an empty migrations dictionary.
     ;; ;; During this first call, your template must set the version to 1 for future interactions and finish the execution.
-    ;; if ( (version_expected == 0) & (migrations.dict_empty?())) { ;; ??? & (migrations.dict_empty?())
-    ;;     version_current = 1;
-    ;;     return ();
-    ;; }
+    if ( (version_expected == 0) & (migrations.dict_empty?())) { ;; ??? & (migrations.dict_empty?())
+        version_current = 1;
+        return ();
+    }
 
     ;; if (version_expected < version_current) {
     ;;     throw(1); ;; ???
@@ -117,12 +117,12 @@ global int version_current;
     ;; ;; if it is the first call, wrap the storage and finish execution by returning from the function
     ;; ;; ---
 
-    ;; slice ds = get_data().begin_parse();
-    ;; cell storage = ds~load_ref();
+    slice ds = get_data().begin_parse();
+    cell storage = ds~load_ref();
     
-    ;; storage = process_message(storage, msg_value, my_balance, in_msg_full, payload.begin_parse());
+    storage = process_message(storage, msg_value, my_balance, in_msg_full, payload.begin_parse());
 
-    ;; set_data(wrap_storage(-2, storage)); ;; -2 is just a random placeholder for the version
+    set_data(wrap_storage(-2, storage)); ;; -2 is just a random placeholder for the version
 }
 
 ;; cell get_storage() - Returns the main smart contract's unwrapped storage.
