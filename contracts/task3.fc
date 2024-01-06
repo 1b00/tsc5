@@ -1,5 +1,19 @@
 #include "imports/stdlib.fc";
 
+;; Hey, I put the recv_internal function from the bottom of the file to the top, fully replicating the template in terms of function order, and it made me pass the tests right away from 4/10. Maybe you have a similar issue?
+;; Oh and I left the msg_value and balance as they were in the task, I didn't try swapping them yet so not sure if that matters at all.
+;; Did you use set_code in addition to set_c3? That got me from 3/10 to 4/10 then I did what Andy said to get to 10/10
+;; No I used only set_c3 :( We should use set_c3 for both migration_code and new_code right?
+;; Yes and set_code for new_code
+;; If expected_version == current_version, we do not need to set_code(new_code) right? Only have to call process_message and set_data
+;; Yes, also make sure to not migrate the storage if there are missing links in the migration chain
+;; how do we transfrom cell to cont?
+;; set_c3(code.begin_parse().bless());
+;; storage.process_message(...) will not work, but process_message(storage, ...) will.
+;; Does this mean that the migrations dictionary would be empty? Or the migration code would be empty cell?
+;; No. It'd be a normal dictionary, it'd have a key 1 and the value would be 4 and then no migration code in a reference (according to TLB)
+;; TLB can be confusing, don't hesitate to ask more if you don't understand something.
+
 ;; Hey, I put the recv_internal function from the bottom of the file to the top, fully replicating the template in terms of function order,
 ;;  and it made me pass the tests right away from 4/10. Maybe you have a similar issue?
 ;; Oh and I left the msg_value and balance as they were in the task, I didn't try swapping them yet so not sure if that matters at all.
@@ -40,7 +54,8 @@ global int version_current;
 ;;     if an update is needed - it migrates the storage and updates the contract code;
 ;;       if the update is needed but update code isn't attached, it throws an error 200.
 ;;     Executes process_message and updates storage.
-() recv_internal(int msg_value, int balance, cell in_msg_full, slice in_msg_body) impure {
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
     ;; expected_version:uint32 new_code:(Maybe ^Cell) migrations:(HashmapE 32 MigrationPayload) payload:^Cell = InternalMsgBody;
     ;;                      new_version:uint32 migration_code:(Maybe ^Cell) = MigrationPayload;
     int version_expected = in_msg_body~load_uint(32);
