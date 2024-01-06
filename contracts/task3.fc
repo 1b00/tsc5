@@ -24,6 +24,30 @@ cell migrate_one(cell old_storage) { ;; it's just a placeholder that is required
 
 ;; }
 
+cell get_storage() {
+    slice cs = get_data().begin_parse();
+
+    cs~load_uint(32); ;; skip version
+
+    ;; Logic to extract the storage on which the version-specific process_message and get-methods operate
+    cell storage = cs~load_ref();
+
+    return storage;
+}
+
+cell wrap_storage(int version_id, cell storage) {
+    ;; add additional data required for versioning in this cell
+    return begin_cell()
+        .store_uint(version_id, 32)
+        .store_ref(storage)
+    .end_cell();
+}
+
+;; Return the current version of the smart contract
+int version() method_id {
+    return get_data().begin_parse().preload_uint(32);
+}
+
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
     in_msg_body~skip_bits(32); ;; Skip the expected version
     in_msg_body~load_maybe_ref(); ;; Skip the expected code
@@ -42,30 +66,6 @@ cell migrate_one(cell old_storage) { ;; it's just a placeholder that is required
 
     set_data(wrap_storage(-2, storage)); ;; -2 is just a random placeholder for the version
 
-}
-
-cell get_storage() impure {
-    slice cs = get_data().begin_parse();
-
-    cs~load_uint(32); ;; skip version
-
-    ;; Logic to extract the storage on which the version-specific process_message and get-methods operate
-    cell storage = cs~load_ref();
-
-    return storage;
-}
-
-cell wrap_storage(int version_id, cell storage) impure {
-    ;; add additional data required for versioning in this cell
-    return begin_cell()
-        .store_uint(version_id, 32)
-        .store_ref(storage)
-    .end_cell();
-}
-
-;; Return the current version of the smart contract
-int version() method_id {
-    return get_data().begin_parse().preload_uint(32);
 }
 
 ;; () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
