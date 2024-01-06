@@ -53,7 +53,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     return begin_cell().store_uint((distance << KEY_BSIZE) + node_prev, VALUE_BSIZE + KEY_BSIZE).end_cell().begin_parse();
 }
 
-(cell, ()) update_neighbour(cell node_paths, int i, int j, int rows, int cols, tuple maze_input, int node_prev, int node_prev_value) inline {
+(cell, ()) update_neighbour(cell node_paths, int i, int j, int rows, int cols, tuple maze_input, int node_prev, int node_prev_value, int node_start) inline {
     ;; skip invalid coordinates
     if ( (i < 0) | (j < 0) | (i >= rows) | (j >= cols) ) {
         return (node_paths, ());
@@ -70,6 +70,9 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         ((maze_symbol == "?"u) ? (1 << Q_SHIFT) : 0) + 
         ((maze_symbol == "X"u) ? (1 << X_SHIFT) : 0) + 
         node_prev_value + 1;
+    if (node_start == node_neighbour) {
+        node_neighbour_value -= 1;
+    }
     ;; update value if nesessary
     (slice value, int found?) = node_paths.udict_get?(KEY_BSIZE, node_neighbour);
     ifnot (found?) {
@@ -105,14 +108,14 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         (int i, int j) = (node_curr >> KEY_SHIFT, node_curr & 0x1f);
         ~dump(count);
         count += 1;
-        node_paths~update_neighbour(i - 1, j    , rows, cols, maze_input, node_curr, node_curr_value);
-        node_paths~update_neighbour(i - 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value);
-        node_paths~update_neighbour(i    , j + 1, rows, cols, maze_input, node_curr, node_curr_value);
-        node_paths~update_neighbour(i + 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value);
-        node_paths~update_neighbour(i + 1, j    , rows, cols, maze_input, node_curr, node_curr_value);
-        node_paths~update_neighbour(i + 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value);
-        node_paths~update_neighbour(i    , j - 1, rows, cols, maze_input, node_curr, node_curr_value);
-        node_paths~update_neighbour(i - 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value);
+        node_paths~update_neighbour(i - 1, j    , rows, cols, maze_input, node_curr, node_curr_value, node_start);
+        node_paths~update_neighbour(i - 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value, node_start);
+        node_paths~update_neighbour(i    , j + 1, rows, cols, maze_input, node_curr, node_curr_value, node_start);
+        node_paths~update_neighbour(i + 1, j + 1, rows, cols, maze_input, node_curr, node_curr_value, node_start);
+        node_paths~update_neighbour(i + 1, j    , rows, cols, maze_input, node_curr, node_curr_value, node_start);
+        node_paths~update_neighbour(i + 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value, node_start);
+        node_paths~update_neighbour(i    , j - 1, rows, cols, maze_input, node_curr, node_curr_value, node_start);
+        node_paths~update_neighbour(i - 1, j - 1, rows, cols, maze_input, node_curr, node_curr_value, node_start);
         ;; set node was visited
         node_distances~udict_delete?(VALUE_BSIZE + KEY_BSIZE, (node_curr_value << KEY_BSIZE) + node_curr);
         node_visited~udict_set(KEY_BSIZE, node_curr, "");
