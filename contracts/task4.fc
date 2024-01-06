@@ -8,12 +8,12 @@
 ;; 69   105     45  01000101    E
 
 ;; n = rows, m = cols, max is 31x31
-const int KEY_SHIFT = 5;                ;; 31 takes  5 bits
+const int KEY_SHIFT = 6;                ;; 31 takes  5 bits
 const int KEY_BSIZE = KEY_SHIFT * 2;   ;; 31 << 5 + 31 takes 10 bits
-const int VALUE_BSIZE = 32;             ;; to store 31x31 of Xs (weight 1M)
+const int VALUE_BSIZE = 64;             ;; to store 31x31 of Xs (weight 1M)
 const int MAX_VALUE = (1 << VALUE_BSIZE) - 1;
-const int X_SHIFT = 20;
-const int Q_SHIFT = 10;
+const int X_SHIFT = 30;
+const int Q_SHIFT = 15;
 const slice NO_VALUE = "";
 
 global cell node_distances;
@@ -59,10 +59,6 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
     if ( (i < 0) | (j < 0) | (i >= rows) | (j >= cols) ) {
         return (node_paths, ());
     }
-    int maze_symbol = maze_input.at(i).at(j);
-    if ((rows == 31) & (cols == 31) & ((maze_symbol == "X"u) | (maze_symbol == "?"u))) {
-        return (node_paths, ());
-    }
     int node_neighbour = keygen(i, j);
     ;; skip visited nodes
     (_, int found?) = node_visited.udict_get?(KEY_BSIZE, node_neighbour);
@@ -70,6 +66,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         return (node_paths, ());
     }
     ;; calc value considering obstacle weight
+    int maze_symbol = maze_input.at(i).at(j);
     int node_neighbour_value =
         ((maze_symbol == "?"u) ? (1 << Q_SHIFT) : 0) + 
         ((maze_symbol == "X"u) ? (1 << X_SHIFT) : 0) + 
@@ -124,10 +121,7 @@ forall X -> (tuple, ()) ~tpush(tuple t, X value) asm "TPUSH";
         node_distances~udict_delete?(VALUE_BSIZE + KEY_BSIZE, (node_curr_value << KEY_BSIZE) + node_curr);
         node_visited~udict_set(KEY_BSIZE, node_curr, NO_VALUE);
 
-        (int node_curr_value_node, _, int min_found?) = node_distances.udict_get_min?(VALUE_BSIZE + KEY_BSIZE);
-        ifnot (min_found?) {
-            return(-1, 0, 0, empty_tuple(), empty_tuple(), new_dict());
-        }
+        (int node_curr_value_node, _, _) = node_distances.udict_get_min?(VALUE_BSIZE + KEY_BSIZE);
         (node_curr, node_curr_value) = (node_curr_value_node & 0x3ff, node_curr_value_node >> KEY_BSIZE);
         if (node_start == node_curr) {
             node_start_value = node_curr_value + 1;
