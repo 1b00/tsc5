@@ -35,4 +35,13 @@ describe('Task1', () => {
         // the check is done inside beforeEach
         // blockchain and task1 are ready to use
     });
+
+    it('fift', async () => {
+        const r = await blockchain.runGetMethod(task1.address, "fift")
+        
+        let rc = r.stackReader;
+
+        console.log("gasUsed: ", r.gasUsed.toString())
+    });
+
 });

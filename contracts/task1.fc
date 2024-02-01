@@ -58,6 +58,7 @@ int get_execution_time() method_id {
     int op = in_msg~load_uint(32);
     in_msg~load_uint(64); ;; query_id
 
+
     if (op == op::update) {
     	var signature = in_msg~load_bits(512);
 
@@ -112,4 +113,26 @@ int get_execution_time() method_id {
 
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 
+}
+
+(int) add() asm """
+    4 PUSHINT
+    ONE
+    TWO
+    ADD
+    TEN
+    MUL
+    3 PUSHINT
+    ADD
+    2 PUSHINT
+    ADD
+    8 PUSHINT
+    SUB
+    MUL
+""";
+
+() fift() method_id {
+    ~strdump("fift");
+    int hk = add();
+    ~dump(hk);
 }
